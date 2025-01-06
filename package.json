@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "connect-flash": "^0.1.1",
+    "ejs": "^3.1.8",
+    "ejs-mate": "^4.0.0",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "joi": "^17.9.2",
+    "leaflet-geoserver-request": "^1.2.2",
+    "method-override": "^3.0.0",
+    "nodemon": "^3.1.9",
+    "nodeplotlib": "^0.7.7",
+    "sanitize-html": "^2.10.0"
+  }
+}

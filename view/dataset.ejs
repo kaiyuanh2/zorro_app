@@ -1,0 +1,97 @@
+<% layout('layouts/boilerplate') %>
+
+    <div id="headingGroup" class="text-center d-none d-lg-block mt-3">
+        <h1>Upload a Dataset</h1>
+    </div>
+
+    <% if(success && success.length) { %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <%= success %>
+        </div>
+    <% } %>
+    
+    <% if(error && error.length) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <%= error %>
+        </div>
+    <% } %>
+
+    <div class="row align-items-center mt-3 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <p>Please follow the format described in the documentation below and read the warnings carefully. By clicking "Upload", you agree to all the terms, conditions, and possible consequences listed below.</p>
+                <div class="row align-items-center mt-3">
+                    <form id="custom_map_upload" action="/upload" method="POST" enctype="multipart/form-data">
+                        <div class="row align-items-center mt-3">
+                            <div class="col-12">
+                                <label for="fileSelect" class="form-label">Upload dataset file here:</label>
+                                <input type="file" id="dataSet" name="dataSet" class="form-control" accept=".csv, .xlsx, .xls"
+                                    max="10000000" required>
+                            </div>
+                        </div>
+
+                        <div class="row align-items-center mt-3">
+                            <div class="col-10">
+                                <label for="mapName" class="form-label">Name of Dataset (required):</label>
+                                <input type="text" id="mapName" name="mapName" class="form-control" required>
+                            </div>
+                            <div class="col-2">
+                                <button type="submit" class="btn btn-primary btn-lg"><strong>+</strong> Upload</button>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content mt-5">
+        <div class="text-center" id="headingGroup">
+            <h2>Instructions for Uploading a Dataset</h2>
+        </div>
+
+        <br>
+
+        <div id="headingGroup">
+            <h3>File format requirements:</h3>
+        </div>
+        <div id="aboutText">
+            <p style='margin-top:3.0pt;margin-right:0in;
+                    margin-left:1.0in;margin-bottom:.0001pt;text-indent:-.25in;line-height:normal'>Requirement 1.</p>
+        </div>
+
+        <br>
+
+        <div id="headingGroup">
+            <h3>Tips:</h3>
+        </div>
+
+        <div id="aboutText">
+            <p style='margin-top:3.0pt;margin-right:0in;
+            margin-left:1.0in;margin-bottom:.0001pt;text-indent:-.25in;line-height:normal'>1.&nbsp;&nbsp;Tip 1</p>
+        </div>
+
+        <br>
+
+        <div id="headingGroup">
+            <h3>File size and optimization:</h3>
+        </div>
+
+        <div id="aboutText">
+
+            <p style='margin-top:3.0pt;margin-right:0in;
+                    margin-left:1.0in;margin-bottom:.0001pt;text-indent:-.25in;line-height:normal'>1.&nbsp;&nbsp;Rule 1.</p>
+        </div>
+
+        <br>
+
+        <div id="headingGroup">
+            <h3>Upload limitations and warnings:</h3>
+        </div>
+
+        <div id="referenceText">
+            <p>Warning 1.</p>
+        </div>
+        
+    </div>

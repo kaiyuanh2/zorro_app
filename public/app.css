@@ -1,0 +1,49 @@
+.content {
+    margin-top: 100px;
+    margin-bottom: 100px;
+}
+
+#headingGroup h1 {
+    color: black;
+    font-weight: 700;
+    font-size: 2.85rem;
+}
+
+#headingGroup h2 {
+    color: black;
+    font-weight: 600;
+    font-size: 2.25rem;
+}
+
+#headingGroup h3 {
+    color: black;
+    font-weight: 500;
+    font-size: 2rem;
+}
+
+#headingGroup h4 {
+    color: black;
+    font-weight: 400;
+    font-size: 2rem;
+}
+
+#aboutText p {
+    color: black;
+    font-weight: 300;
+    font-size: 1.5rem;
+}
+
+#referenceText p {
+    color: black;
+    font-weight: 300;
+    font-size: 1.25rem;
+}
+
+.navbar.scrolled {
+    background: white;
+    transition: background 500ms;
+}
+
+body {
+    font-family: 'Open+Sans', sans-serif !important;
+}

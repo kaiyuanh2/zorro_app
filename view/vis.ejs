@@ -1,0 +1,188 @@
+<% layout('layouts/boilerplate') %>
+    <link rel="stylesheet" href="map.css">
+
+    <section class="container-fluid px-0">
+        <div class="row align-items-center mt-5">
+            <div class="card mx-auto w-90 border-0">
+                <div id="headingGroup" class="text-center d-none d-lg-block">
+                    <h1 class="">ZORRO Visualizations</h1>
+                </div>
+                <!-- <div id="headingGroup" class="text-center d-none d-lg-block">
+                <h4>Legend: The lighter, the higher percentage (better); the darker, the lower percentage (worse)</h4>
+            </div> -->
+            </div>
+        </div>
+
+        <% if (messages.length> 0) { %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <%= messages[0] %>
+            </div>
+            <% } %>
+
+                <div class="row align-items-center mt-3 mb-3">
+                    <div class="col">
+                        <div class="card mx-auto w-90">
+                            <div class="card-header">
+                                <div class="row mt-1 mb-1"><strong>Options</strong></div>
+                            </div>
+                            <div class="card-block p-2">
+                                <form id="display_options" action="/visualizations" method="POST">
+                                    <div class="form-group row mt-2 align-items-center">
+                                        <div class="col-md-4">
+                                            <select class="form-select" name="item" id="item">
+                                                <option value="" selected>--Dataset--</option>
+                                                <option value="i1" <%=item==="i1" ? 'selected' : '' %>>MPG
+                                                </option>
+                                                <option value="i2" <%=item==="i2" ? 'selected' : '' %>>German
+                                                </option>
+                                                <option value="i3" <%=item==="i3" ? 'selected' : '' %>>Insurance
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <select class="form-select" name="imp" id="imp">
+                                                <option value="" selected>--Imputer Set--</option>
+                                                <option value="s1" <%=item==="i1" ? 'selected' : '' %>>Default
+                                                </option>
+                                                <option value="s2" <%=item==="i1" ? 'selected' : '' %>>Custom 1
+                                                </option>
+                                                <option value="s3" <%=item==="i1" ? 'selected' : '' %>>Custom 2
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <select class="form-select" name="test" id="test">
+                                                <option value="" selected>--Test--</option>
+                                                <option value="y" <%=item==="i1" ? 'selected' : '' %>>No
+                                                </option>
+                                                <option value="n" <%=item==="i1" ? 'selected' : '' %>>Yes
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+    
+                                    <div class="form-group row mt-2 mb-2 align-items-center justify-content-end">
+                                        <div class="col">
+                                            <button type="button" class="btn btn-info" data-bs-toggle="modal"
+                                                data-bs-target="#helpModal"><strong>?</strong> Help</button>
+                                        </div>
+                                        <div class="col-auto">
+                                            <button type="submit" class="btn btn-primary">Submit</button>
+                                        </div>
+                                    </div>
+    
+                                    <div class="modal fade" id="helpModal" tabindex="-1"
+                                        aria-labelledby="helpModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="modalLabel">Help for Visualization Options</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="form-group row mt-2 align-items-center">
+                                                        <p><label><b>--Dataset--</b> Choose an uploaded dataset to run ZORRO on it, if you do not see the dataset you are looking for, it is not uploaded yet or being processed.</label></p>
+                                                        <p><label><b>--Imputer Set--</b> Choose a set of imputers to provide ZORRO with ranges for missing data points.</label></p>
+                                                        <p><label><b>--Test--</b> Run or do not feed the abstract model with testing dataset to check abstract model's performance and view testing dataset's statistics.</label></p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-success"
+                                                        onclick="window.location.href='/'"><strong>+</strong> Upload a Dataset</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+    
+                                    <input type="hidden" name="checkboxStr" id="checkbox_str">
+    
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row align-items-center mt-5">
+                    <div class="col">
+                        <div class="card mx-auto w-90">
+                            <div class="card-header">
+                                <div class="row mt-1 mb-1"><strong>Symbolic Expression</strong></div>
+                            </div>
+                            <div class="card-block p-3">
+                                <p class="card-text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusamus sit rerum consequuntur voluptatem perferendis similique, quisquam ipsa eius? Id modi reiciendis velit asperiores nemo! Magni aut tempore praesentium tenetur fuga.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row align-items-center mt-5">
+                    <div class="col">
+                        <div class="card mx-auto w-90">
+                            <div class="card-header">
+                                <div class="row mt-1 mb-1"><strong>Model Weight</strong></div>
+                            </div>
+                            <div class="card-block p-3">
+                                <p class="card-text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusamus sit rerum consequuntur voluptatem perferendis similique, quisquam ipsa eius? Id modi reiciendis velit asperiores nemo! Magni aut tempore praesentium tenetur fuga.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card mx-auto w-90">
+                            <div class="card-header">
+                                <div class="row mt-1 mb-1"><strong>Zonotope</strong></div>
+                            </div>
+                            <div class="card-block p-3">
+                                <p class="card-text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusamus sit rerum consequuntur voluptatem perferendis similique, quisquam ipsa eius? Id modi reiciendis velit asperiores nemo! Magni aut tempore praesentium tenetur fuga.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row align-items-center mt-5">
+                    <div class="col">
+                        <div class="card mx-auto w-90">
+                            <div class="card-header">
+                                <div class="row mt-1 mb-1"><strong>Robustness Report</strong></div>
+                            </div>
+                            <div class="card-block p-3">
+                                <p class="card-text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusamus sit rerum consequuntur voluptatem perferendis similique, quisquam ipsa eius? Id modi reiciendis velit asperiores nemo! Magni aut tempore praesentium tenetur fuga.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row align-items-center mt-5">
+                    <div class="col">
+                        <div class="card mx-auto w-90">
+                            <div class="card-header">
+                                <div class="row mt-1 mb-1"><strong>Testing Results</strong></div>
+                            </div>
+                            <div class="card-block p-3">
+                                <p class="card-text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusamus sit rerum consequuntur voluptatem perferendis similique, quisquam ipsa eius? Id modi reiciendis velit asperiores nemo! Magni aut tempore praesentium tenetur fuga.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card mx-auto w-90">
+                            <div class="card-header">
+                                <div class="row mt-1 mb-1"><strong>Test Set tests</strong></div>
+                            </div>
+                            <div class="card-block p-3">
+                                <p class="card-text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusamus sit rerum consequuntur voluptatem perferendis similique, quisquam ipsa eius? Id modi reiciendis velit asperiores nemo! Magni aut tempore praesentium tenetur fuga.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    </section>
+
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"
+        integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+        integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+    <script>
+        const grade_str = '<%- grade %>';
+        const item_str = '<%- item %>';
+        const year_str = '<%- year %>';
+        const checkbox = '<%- checkboxStr %>'
+    </script>
