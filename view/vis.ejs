@@ -23,12 +23,12 @@
                     <div class="col">
                         <div class="card mx-auto w-90">
                             <div class="card-header">
-                                <div class="row mt-1 mb-1"><strong>Options</strong></div>
+                                <div class="row mt-1 mb-1"><strong>Select Dataset</strong></div>
                             </div>
                             <div class="card-block p-2">
                                 <form id="display_options" action="/visualizations" method="POST">
                                     <div class="form-group row mt-2 align-items-center">
-                                        <div class="col-md-4">
+                                        <div class="col-md-10">
                                             <select class="form-select" name="item" id="item">
                                                 <option value="" selected>--Dataset--</option>
                                                 <option value="i1" <%=item==="i1" ? 'selected' : '' %>>MPG
@@ -39,35 +39,12 @@
                                                 </option>
                                             </select>
                                         </div>
-                                        <div class="col-md-4">
-                                            <select class="form-select" name="imp" id="imp">
-                                                <option value="" selected>--Imputer Set--</option>
-                                                <option value="s1" <%=item==="i1" ? 'selected' : '' %>>Default
-                                                </option>
-                                                <option value="s2" <%=item==="i1" ? 'selected' : '' %>>Custom 1
-                                                </option>
-                                                <option value="s3" <%=item==="i1" ? 'selected' : '' %>>Custom 2
-                                                </option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <select class="form-select" name="test" id="test">
-                                                <option value="" selected>--Test--</option>
-                                                <option value="y" <%=item==="i1" ? 'selected' : '' %>>No
-                                                </option>
-                                                <option value="n" <%=item==="i1" ? 'selected' : '' %>>Yes
-                                                </option>
-                                            </select>
-                                        </div>
-                                    </div>
-    
-                                    <div class="form-group row mt-2 mb-2 align-items-center justify-content-end">
-                                        <div class="col">
+                                        <div class="col-md-1">
                                             <button type="button" class="btn btn-info" data-bs-toggle="modal"
                                                 data-bs-target="#helpModal"><strong>?</strong> Help</button>
                                         </div>
-                                        <div class="col-auto">
-                                            <button type="submit" class="btn btn-primary">Submit</button>
+                                        <div class="col-md-1">
+                                            <button type="submit" class="btn btn-primary">Confirm</button>
                                         </div>
                                     </div>
     
@@ -82,9 +59,8 @@
                                                 </div>
                                                 <div class="modal-body">
                                                     <div class="form-group row mt-2 align-items-center">
-                                                        <p><label><b>--Dataset--</b> Choose an uploaded dataset to run ZORRO on it, if you do not see the dataset you are looking for, it is not uploaded yet or being processed.</label></p>
-                                                        <p><label><b>--Imputer Set--</b> Choose a set of imputers to provide ZORRO with ranges for missing data points.</label></p>
-                                                        <p><label><b>--Test--</b> Run or do not feed the abstract model with testing dataset to check abstract model's performance and view testing dataset's statistics.</label></p>
+                                                        <p><label><b>--Dataset--</b> Choose an uploaded dataset to run ZORRO on it, if you do not see the dataset you are looking for, please upload using the button below.</label></p>
+                                                        <p>After selecting a dataset, click "Confirm" to show corresponding visualizations.</p>
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-success"
@@ -144,9 +120,13 @@
                                 <div class="tab-content" id="tabContents">
                                     <div class="tab-pane fade show active" id="tab1" role="tabpanel" aria-labelledby="tab1-tab">
                                         <div id="headingGroup" class="text-center d-none d-lg-block mt-2">
-                                            <h3>Symbolic Expression (Sample) of the Abstract Model</h3>
+                                            <h3>Symbolic Expression (Sampled) of the Abstract Model</h3>
                                         </div>
-                                        <p class="card-text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusamus sit rerum consequuntur voluptatem perferendis similique, quisquam ipsa eius? Id modi reiciendis velit asperiores nemo! Magni aut tempore praesentium tenetur fuga.</p>
+                                        <p class="card-text">
+                                            <div class="math">
+                                                $$ \left[ \begin{matrix}1.40612616156854 e_{0} + 0.408184307991808 e_{1} + 0.172791925632896 e_{10} + 0.212000336453005 e_{11} + 0.480278423213165 e_{12} + 1.68346615024191 e_{13} + 0.598904133490457 e_{14} + 2.81728565127706 e_{15} + 0.405468761379099 e_{16} + 1.8411663640929 e_{17} + 0.342546206321708 e_{18} + 0.265023663531315 e_{19} + 0.949513845069409 e_{2} + 0.292898880713855 e_{20} + 1.45214115338723 e_{21} + 0.938538984720797 e_{22} + 0.503214287103881 e_{23} + 0.574073422243579 e_{24} + 0.457124006715831 e_{25} + 0.305256045774164 e_{26} + 0.768629291400749 e_{27} + 0.30218189514741 e_{28} + 2.74078686126669 e_{29} + 0.181985026547432 e_{3} + 1.71111154757333 e_{4} + 0.810353280832912 e_{5} + 0.45282421654488 e_{6} + 0.773867750457293 e_{7} + 0.173583707274978 e_{8} + 1.41218551362555 e_{9} + 0.56314058252495 ep_{0} + 2.34186253301395 ep_{1} - 3.36060791979856 ep_{2} + 0.708155434938349 ep_{3} + 13219.9063949031\\0.0611069275780196 e_{0} + 0.546360852337171 e_{1} - 0.324345244024774 e_{10} + 0.251112717113381 e_{11} + 0.173318346997354 e_{12} + 3.19171794404078 e_{13} + 0.762997875403353 e_{14} + 9.71078982500621 e_{15} + 0.251092711960439 e_{16} + 0.110974314044754 e_{17} + 0.282660935691229 e_{18} + 0.227751195794303 e_{19} + 1.10216221949883 e_{2} - 0.275597360011435 e_{20} + 1.03570926173584 e_{21} + 0.556775904207886 e_{22} + 0.132597059342985 e_{23} - 0.973968041519179 e_{24} - 0.638219784247792 e_{25} - 0.558538526988949 e_{26} - 1.27328031632321 e_{27} - 0.00102333718271862 e_{28} - 5.68175616073795 e_{29} + 0.0481214940778133 e_{3} - 1.05262437510365 e_{4} + 0.174860385969959 e_{5} + 0.344340467424078 e_{6} + 0.350627173215459 e_{7} - 0.312625657986407 e_{8} + 1.20449036538166 e_{9} + 11.954666993056 ep_{0} - 0.274389335984867 ep_{1} + 0.116011101127251 ep_{2} + 15.201434974929 ep_{3} + 3444.57124010336\\6.81136345390371 e_{0} + 1.32020468469665 e_{1} + 0.643713519596314 e_{10} + 0.667556214711711 e_{11} - 1.98576648425392 e_{12} - 23.8092086200348 e_{13} + 1.38911678564686 e_{14} - 60.0717908481381 e_{15} + 1.47730847077233 e_{16} + 11.9835815088048 e_{17} + 1.17403357967107 e_{18} + 0.870560693295113 e_{19} - 4.17945939477455 e_{2} + 1.12767395255348 e_{20} - 13.3235226021796 e_{21} + 4.89039438703815 e_{22} - 6.77958518396712 e_{23} + 1.9799420847981 e_{24} + 2.09629806209736 e_{25} + 0.975608754578635 e_{26} + 2.85681686780796 e_{27} + 1.1023312503319 e_{28} + 20.6868550285604 e_{29} + 0.673719132489645 e_{3} - 5.16409575573295 e_{4} + 4.14966004780886 e_{5} + 1.66579229279855 e_{6} + 2.32387689831268 e_{7} + 0.411893967057361 e_{8} + 2.61935661960317 e_{9} + 10.8382588122182 ep_{0} + 1.03419629826466 ep_{1} + 0.261680152817147 ep_{2} - 16.2594571535157 ep_{3} + 1818.92917672574\\3.52385363277372 e_{0} + 0.653349196604725 e_{1} - 0.148121481713395 e_{10} - 0.196278185298795 e_{11} - 0.444022289557746 e_{12} + 0.913905725946313 e_{13} - 0.556810753266093 e_{14} - 2.90719783040133 e_{15} - 0.369900051646193 e_{16} - 0.0642373156140623 e_{17} + 0.264081009535868 e_{18} - 0.0198575935803924 e_{19} - 0.895111570859634 e_{2} - 0.257022316303986 e_{20} + 0.910048343976263 e_{21} - 0.852284009587944 e_{22} - 0.474970820388854 e_{23} - 0.494752552200528 e_{24} - 0.3957837534532 e_{25} - 0.00502029980951472 e_{26} - 0.662628426610425 e_{27} + 0.239241217841328 e_{28} + 0.0527338388310259 e_{29} + 0.296973644567603 e_{3} - 1.54083455399134 e_{4} - 0.0388833818600546 e_{5} + 1.11660404484136 e_{6} - 0.0525950620452951 e_{7} + 0.578721541004684 e_{8} + 1.06199169330144 e_{9} + 1.68050634618872 ep_{0} - 5.5027770987554 ep_{1} - 1.38680618934839 ep_{2} - 3.51244090415473 ep_{3} + 307.60746615805\end{matrix} \right] $$
+                                            </div>
+                                        </p>
                                     </div>
 
                                     <div class="tab-pane fade" id="tab2" role="tabpanel" aria-labelledby="tab2-tab">
@@ -193,8 +173,7 @@
 
     <script src="https://code.jquery.com/jquery-3.6.3.min.js"
         integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
-        integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>
         const grade_str = '<%- grade %>';
         const item_str = '<%- item %>';
