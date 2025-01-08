@@ -47,3 +47,9 @@
 body {
     font-family: 'Open+Sans', sans-serif !important;
 }
+
+.math {
+    overflow-x: auto;
+    overflow-y: auto;
+    white-space: nowrap;
+}
