@@ -2,9 +2,7 @@ const Joi = require('joi');
 
 const schema = Joi.object().keys({
     item: Joi.string().valid('i1', 'i2', 'i3').required().default('i1'),
-    imp: Joi.string().valid('s1', 's2', 's3').required().default('s1'),
-    test: Joi.string().valid('y', 'n').required().default('n'),
-    checkboxStr: Joi.string().min(2).required().default('aa')
+    test: Joi.string().valid('t1', 't2').required().default('t1')
 }).unknown(true);
 
 module.exports.validateParameters = async (req, res, next) => {

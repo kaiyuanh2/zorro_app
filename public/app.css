@@ -53,3 +53,7 @@ body {
     overflow-y: auto;
     white-space: nowrap;
 }
+
+#testSelect {
+    display: none;
+}

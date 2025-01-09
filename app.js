@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const { exec } = require("child_process");
 const path = require('path');
 const ejsMate = require('ejs-mate');
 const methodOverride = require('method-override');
@@ -38,19 +39,33 @@ app.get('/', (req, res) => {
 
 app.get('/visualizations', validateParameters, (req, res) => {
     var item = '';
-    var grade = '';
-    var year = '';
-    var checkboxStr = '';
-    res.render('vis', {item, grade, year, checkboxStr, messages: req.flash('error')});
+    var test = '';
+    var expression = '';
+    res.render('vis', {item, test, expression, messages: req.flash('error')});
 })
 
 app.post('/visualizations', validateParametersPost, (req, res) => {
-    console.log(req.body);
+    // console.log(req.body);
     var item = req.body.item;
-    var grade = req.body.grade;
-    var year = req.body.year;
-    var checkboxStr = req.body.checkboxStr;
-    res.render('vis', {item, grade, year, checkboxStr, messages: req.flash('error')});
+    var test = req.body.test;
+    var expression = '';
+    const command = `python public/process.py ${item} ${test}`;
+    exec(command, (err, stdout, stderr) => {
+        if (err) {
+            console.error(`Error: ${err.message}`);
+        }
+        if (stderr) {
+            console.error(`Stderr: ${stderr}`);
+        }
+        if (stdout) {
+            console.log("Python success")
+            expression = stdout;
+        }
+        
+        console.log(expression);
+        res.render('vis', {item, test, expression, messages: req.flash('error')});
+    });
+
 })
 
 app.get('/dataset', (req, res) => {
