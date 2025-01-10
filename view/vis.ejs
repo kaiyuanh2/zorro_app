@@ -41,9 +41,9 @@
                                         <div class="col-md-5" id="testSelect">
                                             <select class="form-select" name="test" id="test">
                                                 <option value="" selected>--Test Set--</option>
-                                                <option value="t1" <%=item==="t1" ? 'selected' : '' %>>Test Set 1
+                                                <option value="t1" <%=test==="t1" ? 'selected' : '' %>>Test Set 1
                                                 </option>
-                                                <option value="t2" <%=item==="t2" ? 'selected' : '' %>>Test Set 2
+                                                <option value="t2" <%=test==="t2" ? 'selected' : '' %>>Test Set 2
                                                 </option>
                                             </select>
                                         </div>
@@ -131,11 +131,7 @@
                                         <% if (expression=='' ) { %>
                                             <div><p class="card-text">Nothing is selected.</p></div>
                                         <% } else { %>
-                                            <div id="headingGroup" class="text-center d-none d-lg-block mt-2">
-                                                <h3>Symbolic Expression (Sampled) of the Abstract Model</h3>
-                                            </div>
-                                            <div>
-                                                <p class="card-text">stub</p>
+                                            <div id="weightGraph">
                                             </div>
                                         <% } %>
                                     </div>
@@ -180,11 +176,7 @@
                                         <% if (expression=='' ) { %>
                                             <div><p class="card-text">Nothing is selected.</p></div>
                                         <% } else { %>
-                                            <div id="headingGroup" class="text-center d-none d-lg-block mt-2">
-                                                <h3>Symbolic Expression (Sampled) of the Abstract Model</h3>
-                                            </div>
-                                            <div>
-                                                <p class="card-text">stub</p>
+                                            <div id="robustnessGraph">
                                             </div>
                                         <% } %>
                                     </div>
@@ -212,4 +204,13 @@
     <script src="https://code.jquery.com/jquery-3.6.3.min.js"
         integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
     <script src="testdropdown.js"></script>
+    <script>
+        var weights = [<%= weight_mid %>];
+        var weights_max = [<%= weight_max %>];
+        var weights_min = [<%= weight_min %>];
+        var x_labels = JSON.parse('<%- features %>')
+        var robustness_ratios = [<%= robustness %>]
+    </script>
+    <script src="drawgraph.js"></script>

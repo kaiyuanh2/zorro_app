@@ -41,7 +41,12 @@ app.get('/visualizations', validateParameters, (req, res) => {
     var item = '';
     var test = '';
     var expression = '';
-    res.render('vis', {item, test, expression, messages: req.flash('error')});
+    var weight_max = [0];
+    var weight_min = [0];
+    var weight_mid = [0];
+    var features = ["a"];
+    var robustness = [0];
+    res.render('vis', {item, test, expression, weight_max, weight_min, weight_mid, features, robustness, messages: req.flash('error')});
 })
 
 app.post('/visualizations', validateParametersPost, (req, res) => {
@@ -49,6 +54,11 @@ app.post('/visualizations', validateParametersPost, (req, res) => {
     var item = req.body.item;
     var test = req.body.test;
     var expression = '';
+    var weight_max = [0];
+    var weight_min = [0];
+    var weight_mid = [0];
+    var features = ["a"];
+    var robustness = [0];
     const command = `python public/process.py ${item} ${test}`;
     exec(command, (err, stdout, stderr) => {
         if (err) {
@@ -59,11 +69,18 @@ app.post('/visualizations', validateParametersPost, (req, res) => {
         }
         if (stdout) {
             console.log("Python success")
-            expression = stdout;
+            const data = stdout;
+            const output = JSON.parse(data.toString());
+            expression = output.latex;
+            weight_max = output.wt_max;
+            weight_min = output.wt_min;
+            weight_mid = output.wt_mid;
+            features = JSON.stringify(output.features);
+            robustness = output.robustness;
         }
         
-        console.log(expression);
-        res.render('vis', {item, test, expression, messages: req.flash('error')});
+        console.log(features);
+        res.render('vis', {item, test, expression, weight_max, weight_min, weight_mid, features, robustness, messages: req.flash('error')});
     });
 
 })

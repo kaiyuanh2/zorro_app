@@ -5,6 +5,7 @@ import sympy
 import functools
 import itertools
 import sys
+import json
 
 import numpy as np
 import pandas as pd
@@ -82,21 +83,105 @@ def simplify_expression(expr) -> str:
         
         return latex_parts[0] + '+ \dots +' + latex_parts[1] + '+' + latex_parts[2] + '+ \dots +' + latex_parts[3] + '+' + latex_parts[4]
     
+def get_weight(expr) -> [float]:
+    wmax = 0
+    wmin = 0
+    wmid = 0
+    for term in expr.args:
+        coefficient, symbol = term.as_coeff_Mul()
+        if term.is_Number:
+            wmid = coefficient
+            continue
+        if coefficient < 0:
+            wmax += (-1) * coefficient
+            wmin += coefficient
+        else:
+            wmax += coefficient
+            wmin += (-1) * coefficient
+
+    return [wmax, abs(wmin), wmid]
+
+def get_expr_range_radius(expr):
+    expr_range_radius = 0
+    for arg in expr.args:
+        if arg.free_symbols:
+            expr_range_radius += abs(arg.args[0])
+    return expr_range_radius
+
+def get_expr_center(expr):
+    return expr.subs(dict([(symb, 0) for symb in expr.free_symbols]))
+
+def robustness_report(model, X_test, y_test, ss):
+    y_test_sp = sympy.Matrix(y_test.to_numpy().reshape(-1, 1))
+    X_test_sp = sympy.Matrix(np.append(np.ones((len(X_test), 1)), ss.transform(X_test), axis=1))
+    test_preds = X_test_sp*model
+    radius_base = np.median(y_test)
+    robustness_radius = [r * radius_base for r in [0.01, 0.02, 0.03, 0.05, 0.10, 0.20]]
+    robustness_ratios = []
+    pred_range_radiuses = []
+    for pred_id in range(len(test_preds)):
+        pred = test_preds[pred_id]
+        pred_range_radiuses.append(get_expr_range_radius(pred))
+
+    for radius in robustness_radius:
+        robustness_ls = []
+        for pred_id in range(len(test_preds)):
+            if pred_range_radiuses[pred_id] <= radius:
+                robustness_ls.append(1)
+            else:
+                robustness_ls.append(0)
+
+        robustness_ratios.append(float(np.mean(robustness_ls)))
+
+    return robustness_ratios
+
+    
 if __name__ == "__main__":
     dataset = sys.argv[1]
     test = sys.argv[2]
+    features_list = []
 
     if dataset == "i1":
         with open('models/ins/ins_30_model.pkl', 'rb') as file:
             model = pickle.load(file)
+        features_list = ["age", "bmi", "children"]
+        with open('models/ins/ins_30_X_test.pkl', 'rb') as file:
+            X_test = pickle.load(file)
+        with open('models/ins/ins_30_y_test.pkl', 'rb') as file:
+            y_test = pickle.load(file)
+        with open('models/ins/ins_30_ss.pkl', 'rb') as file:
+            ss = pickle.load(file)
 
     latex_str = "\left[\\begin{matrix}"
+    weight_max = []
+    weight_min = []
+    weight_mid = []
+
     for i in range(len(model)):
         latex_str += simplify_expression(model[i])
         if i != len(model) - 1:
             latex_str += "\\\\"
 
+        if i > 0:
+            weights = get_weight(model[i])
+            weight_max.append(float(weights[0]))
+            weight_min.append(float(weights[1]))
+            weight_mid.append(float(weights[2]))
+
     latex_str += "\end{matrix}\\right]"
 
-    print(latex_str)
+    robustness = robustness_report(model, X_test, y_test, ss)
+
+    # print(weight_max, file=sys.stderr)
+
+    output = {
+        "latex": latex_str,
+        "wt_max": weight_max,
+        "wt_min": weight_min,
+        "wt_mid": weight_mid,
+        "features": features_list,
+        "robustness": robustness
+    }
+
+    print(json.dumps(output))
     

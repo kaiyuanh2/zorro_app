@@ -1,7 +1,3 @@
-const item_str = '<%- item %>';
-const test_str = '<%- test %>';
-const exp_str = '<%- expression %>'
-
 const datasetDropdown = document.getElementById('datasetSelect');
 const datasetDropdownMenu = document.getElementById('item');
 const testDropdown = document.getElementById('testSelect');
