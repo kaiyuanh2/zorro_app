@@ -49,7 +49,8 @@ app.get('/visualizations', validateParameters, (req, res) => {
     var center = [0];
     var ub = [0];
     var lb = [0];
-    res.render('vis', {item, test, expression, weight_max, weight_min, weight_mid, features, robustness, messages: req.flash('error')});
+    var x_test = [0];
+    res.render('vis', {item, test, expression, weight_max, weight_min, weight_mid, features, robustness, center, ub, lb, x_test, messages: req.flash('error')});
 })
 
 app.post('/visualizations', validateParametersPost, (req, res) => {
@@ -65,6 +66,7 @@ app.post('/visualizations', validateParametersPost, (req, res) => {
     var center = [0];
     var ub = [0];
     var lb = [0];
+    var x_test = [0];
     const command = `python public/process.py ${item} ${test}`;
     exec(command, (err, stdout, stderr) => {
         if (err) {
@@ -86,10 +88,11 @@ app.post('/visualizations', validateParametersPost, (req, res) => {
             center = output.centers;
             ub = output.ub;
             lb = output.lb;
+            x_test = output.X_test;
         }
         
         console.log(features);
-        res.render('vis', {item, test, expression, weight_max, weight_min, weight_mid, features, robustness, messages: req.flash('error')});
+        res.render('vis', {item, test, expression, weight_max, weight_min, weight_mid, features, robustness, center, ub, lb, x_test, messages: req.flash('error')});
     });
 
 })

@@ -48,12 +48,22 @@ body {
     font-family: 'Open+Sans', sans-serif !important;
 }
 
-.math .predictionTable {
+.math {
     overflow-x: auto;
     overflow-y: auto;
     white-space: nowrap;
 }
 
+.prediction-table {
+    max-height: 800px !important;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
 #testSelect {
     display: none;
+}
+
+.thick-border {
+    border-left: 3px solid black !important;
 }

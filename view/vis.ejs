@@ -186,9 +186,36 @@
                                             <div><p class="card-text">Nothing is selected.</p></div>
                                         <% } else { %>
                                             <div id="headingGroup" class="text-center d-none d-lg-block mt-2">
-                                                <h3>Symbolic Expression (Sampled) of the Abstract Model</h3>
+                                                <h3>Table of Test Dataset and Prediction Ranges</h3>
                                             </div>
-                                            <div id="predictionTable">
+                                            <div class="mt-3">
+                                                <div class="prediction-table">
+                                                    <table class="table table-sm table-hover table-bordered">
+                                                        <thead>
+                                                            <tr>
+                                                                <th scope="col">#</th>
+                                                                <% const features_list = JSON.parse(features) %>
+                                                                <% for (var c in features_list) { %>
+                                                                    <th scope="col"><%= features_list[c] %></th>
+                                                                <% } %>
+                                                                <th scope="col" class="thick-border">Prediction Center</th>
+                                                                <th scope="col">Prediction Range</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <% for (var i=0; i<center.length; i++) { %>
+                                                                <tr>
+                                                                    <th scope="row"><%= i+1 %></th>
+                                                                    <% for (var j in x_test[i]) { %>
+                                                                        <td><%= x_test[i][j] %></td>
+                                                                    <% } %>
+                                                                    <td class="thick-border"><%= center[i] %></td>
+                                                                    <td>[<%= lb[i] %>, <%= ub[i] %>]</td>
+                                                                </tr>
+                                                            <% } %>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                         <% } %>
                                     </div>

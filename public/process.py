@@ -138,9 +138,9 @@ def robustness_report(model, X_test, y_test, ss):
         pred = test_preds[pred_id]
         pred_range_radius = get_expr_range_radius(pred)
         pred_center = get_expr_center(pred)
-        pred_centers.append(pred_center)
-        pred_ub.append(pred_center + pred_range_radius)
-        pred_lb.append(pred_center - pred_range_radius)
+        pred_centers.append(float(pred_center))
+        pred_ub.append(float(pred_center + pred_range_radius))
+        pred_lb.append(float(pred_center - pred_range_radius))
         pred_range_radiuses.append(pred_range_radius)
 
     for radius in robustness_radius:
@@ -172,6 +172,9 @@ if __name__ == "__main__":
         with open('models/ins/ins_30_ss.pkl', 'rb') as file:
             ss = pickle.load(file)
 
+        X_test_lists = []
+        for i in range(len(X_test)):
+            X_test_lists.append([float(j) for j in X_test.values[i].flatten().tolist()])
     latex_str = "\left[\\begin{matrix}"
     weight_max = []
     weight_min = []
@@ -203,7 +206,8 @@ if __name__ == "__main__":
         "robustness": robustness,
         "centers": pred_c,
         "ub": ub,
-        "lb": lb
+        "lb": lb,
+        "X_test": X_test_lists
     }
 
     print(json.dumps(output))
