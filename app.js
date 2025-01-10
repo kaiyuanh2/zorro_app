@@ -46,6 +46,9 @@ app.get('/visualizations', validateParameters, (req, res) => {
     var weight_mid = [0];
     var features = ["a"];
     var robustness = [0];
+    var center = [0];
+    var ub = [0];
+    var lb = [0];
     res.render('vis', {item, test, expression, weight_max, weight_min, weight_mid, features, robustness, messages: req.flash('error')});
 })
 
@@ -59,6 +62,9 @@ app.post('/visualizations', validateParametersPost, (req, res) => {
     var weight_mid = [0];
     var features = ["a"];
     var robustness = [0];
+    var center = [0];
+    var ub = [0];
+    var lb = [0];
     const command = `python public/process.py ${item} ${test}`;
     exec(command, (err, stdout, stderr) => {
         if (err) {
@@ -77,6 +83,9 @@ app.post('/visualizations', validateParametersPost, (req, res) => {
             weight_mid = output.wt_mid;
             features = JSON.stringify(output.features);
             robustness = output.robustness;
+            center = output.centers;
+            ub = output.ub;
+            lb = output.lb;
         }
         
         console.log(features);

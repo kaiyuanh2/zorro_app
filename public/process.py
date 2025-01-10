@@ -6,6 +6,7 @@ import functools
 import itertools
 import sys
 import json
+import re
 
 import numpy as np
 import pandas as pd
@@ -46,6 +47,12 @@ class ForcePlus(LatexPrinter):
     #         return f"(-{super()._print(-expr)})"
     #     return super()._print_Mul(expr)
 
+def add_red(match):
+    return "\\textcolor{red}{" + match.group(0) + "}"
+
+def add_green(match):
+    return "\\textcolor{green}{" + match.group(0) + "}"
+
 def simplify_expression(expr) -> str:
     data_count = 0
     nd_count = 0
@@ -79,9 +86,13 @@ def simplify_expression(expr) -> str:
         latex_parts = new_latex.split('+')
         latex_parts.sort(key=lambda term: (0 if 'e_{0}' in term else 1 if 'e_{' + str(data_count - 1) in term else 2 if 'ep_{0}' in term else 3 if 'ep_{' + str(nd_count - 1) in term else 4))
 
+        pattern_e = r"e_{\d+}"
+        pattern_ep = r"ep_{\d+}"
+        latex_parts = [re.sub(pattern_e, add_red, latex_parts[0]), re.sub(pattern_e, add_red, latex_parts[1]), re.sub(pattern_ep, add_green, latex_parts[2]), re.sub(pattern_ep, add_green, latex_parts[3]), latex_parts[4]]
+
         print(latex_parts, file=sys.stderr)
         
-        return latex_parts[0] + '+ \dots +' + latex_parts[1] + '+' + latex_parts[2] + '+ \dots +' + latex_parts[3] + '+' + latex_parts[4]
+        return latex_parts[0] + '+ \dots +' + latex_parts[1] + '+' + latex_parts[2] + '+ \dots +' + latex_parts[3] + '+ \\textcolor{blue}{' + latex_parts[4] + '}'
     
 def get_weight(expr) -> [float]:
     wmax = 0
@@ -119,9 +130,18 @@ def robustness_report(model, X_test, y_test, ss):
     robustness_radius = [r * radius_base for r in [0.01, 0.02, 0.03, 0.05, 0.10, 0.20]]
     robustness_ratios = []
     pred_range_radiuses = []
+    pred_centers = []
+    pred_ub = []
+    pred_lb = []
+
     for pred_id in range(len(test_preds)):
         pred = test_preds[pred_id]
-        pred_range_radiuses.append(get_expr_range_radius(pred))
+        pred_range_radius = get_expr_range_radius(pred)
+        pred_center = get_expr_center(pred)
+        pred_centers.append(pred_center)
+        pred_ub.append(pred_center + pred_range_radius)
+        pred_lb.append(pred_center - pred_range_radius)
+        pred_range_radiuses.append(pred_range_radius)
 
     for radius in robustness_radius:
         robustness_ls = []
@@ -133,7 +153,7 @@ def robustness_report(model, X_test, y_test, ss):
 
         robustness_ratios.append(float(np.mean(robustness_ls)))
 
-    return robustness_ratios
+    return robustness_ratios, pred_centers, pred_ub, pred_lb
 
     
 if __name__ == "__main__":
@@ -170,7 +190,7 @@ if __name__ == "__main__":
 
     latex_str += "\end{matrix}\\right]"
 
-    robustness = robustness_report(model, X_test, y_test, ss)
+    robustness, pred_c, ub, lb = robustness_report(model, X_test, y_test, ss)
 
     # print(weight_max, file=sys.stderr)
 
@@ -180,7 +200,10 @@ if __name__ == "__main__":
         "wt_min": weight_min,
         "wt_mid": weight_mid,
         "features": features_list,
-        "robustness": robustness
+        "robustness": robustness,
+        "centers": pred_c,
+        "ub": ub,
+        "lb": lb
     }
 
     print(json.dumps(output))

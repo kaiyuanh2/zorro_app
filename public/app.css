@@ -48,7 +48,7 @@ body {
     font-family: 'Open+Sans', sans-serif !important;
 }
 
-.math {
+.math .predictionTable {
     overflow-x: auto;
     overflow-y: auto;
     white-space: nowrap;
