@@ -79,8 +79,6 @@
                                         </div>
                                     </div>
     
-                                    <input type="hidden" name="checkboxStr" id="checkbox_str">
-    
                                 </form>
                             </div>
                         </div>
@@ -105,7 +103,12 @@
                                         </li>
                                         <li class="nav-item">
                                             <a class="nav-link" id="tab3-tab" data-bs-toggle="tab" href="#tab3" role="tab" aria-controls="tab3" aria-selected="false">
-                                            Zonotope
+                                            2D Zonotope
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" id="tab33-tab" data-bs-toggle="tab" href="#tab33" role="tab" aria-controls="tab33" aria-selected="false">
+                                            3D Zonotope
                                             </a>
                                         </li>
                                 </ul>
@@ -140,12 +143,94 @@
                                         <% if (expression=='' ) { %>
                                             <div><p class="card-text">Nothing is selected.</p></div>
                                         <% } else { %>
-                                            <div id="headingGroup" class="text-center d-none d-lg-block mt-2">
-                                                <h3>Symbolic Expression (Sampled) of the Abstract Model</h3>
+                                            <div id="zonotopeForm">
+                                                <form id="zonotopeForm" action="" method="">
+                                                    <div class="form-group row mt-2 align-items-center">
+                                                        <div class="col" id="f1Select">
+                                                            <select class="form-select" name="feature1" id="feature1">
+                                                                <% const features_l = JSON.parse(features) %>
+                                                                <option value="" selected>--Feature 1--</option>
+                                                                <option value="offset">Offset
+                                                                </option>
+                                                                <option value="f1"><%= features_l[0] %>
+                                                                </option>
+                                                                <option value="f2"><%= features_l[1] %>
+                                                                </option>
+                                                                <option value="f3"><%= features_l[2] %>
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col" id="f2Select">
+                                                            <select class="form-select" name="feature2" id="feature2">
+                                                                <option value="" selected>--Feature 2--</option>
+                                                                <option value="offset">Offset
+                                                                </option>
+                                                                <option value="f1"><%= features_l[0] %>
+                                                                </option>
+                                                                <option value="f2"><%= features_l[1] %>
+                                                                </option>
+                                                                <option value="f3"><%= features_l[2] %>
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </form>
                                             </div>
-                                            <div>
-                                                <p class="card-text">stub</p>
+                                            <div class="mt-2" id="zonotopeG"></div>
+                                        <% } %>
+                                    </div>
+
+                                    <div class="tab-pane fade" id="tab33" role="tabpanel" aria-labelledby="tab33-tab">
+                                        <% if (expression=='' ) { %>
+                                            <div><p class="card-text">Nothing is selected.</p></div>
+                                        <% } else { %>
+                                            <div id="zonotopeForm3D">
+                                                <form id="zonotopeForm3D" action="" method="">
+                                                    <div class="form-group row mt-2 align-items-center">
+                                                        <div class="col" id="f1Select3D">
+                                                            <select class="form-select" name="feature13d" id="feature13d">
+                                                                <% const features_l = JSON.parse(features) %>
+                                                                <option value="" selected>--Feature 1--</option>
+                                                                <option value="offset">Offset
+                                                                </option>
+                                                                <option value="f1"><%= features_l[0] %>
+                                                                </option>
+                                                                <option value="f2"><%= features_l[1] %>
+                                                                </option>
+                                                                <option value="f3"><%= features_l[2] %>
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col" id="f2Select3D">
+                                                            <select class="form-select" name="feature23d" id="feature23d">
+                                                                <option value="" selected>--Feature 2--</option>
+                                                                <option value="offset">Offset
+                                                                </option>
+                                                                <option value="f1"><%= features_l[0] %>
+                                                                </option>
+                                                                <option value="f2"><%= features_l[1] %>
+                                                                </option>
+                                                                <option value="f3"><%= features_l[2] %>
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col" id="f3Select3D">
+                                                            <select class="form-select" name="feature33d" id="feature33d">
+                                                                <option value="" selected>--Feature 3--</option>
+                                                                <option value="offset">Offset
+                                                                </option>
+                                                                <option value="f1"><%= features_l[0] %>
+                                                                </option>
+                                                                <option value="f2"><%= features_l[1] %>
+                                                                </option>
+                                                                <option value="f3"><%= features_l[2] %>
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </form>
                                             </div>
+                                            <div class="mt-2" id="zonotopeG3D"></div>
                                         <% } %>
                                     </div>
                                 </div>
@@ -240,3 +325,5 @@
         var robustness_ratios = [<%= robustness %>]
     </script>
     <script src="drawgraph.js"></script>
+    <script src="zonotope.js"></script>
+    <script src="zonotope3d.js"></script>

@@ -7,7 +7,7 @@ var stats = { x: x_labels, y: weights,
 var data = [stats];
 var layout = {
     title: 'Ranges of Abstract Model Weights',
-    xaxis: { title: 'Features' }, yaxis: { title: 'Weights' }
+    xaxis: { title: 'Features' }, yaxis: { title: 'Weights', tickformat: '.4f' }
  };
 Plotly.newPlot('weightGraph', data, layout);
 

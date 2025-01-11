@@ -94,7 +94,7 @@ def simplify_expression(expr) -> str:
         
         return latex_parts[0] + '+ \dots +' + latex_parts[1] + '+' + latex_parts[2] + '+ \dots +' + latex_parts[3] + '+ \\textcolor{blue}{' + latex_parts[4] + '}'
     
-def get_weight(expr) -> [float]:
+def get_weight(expr):
     wmax = 0
     wmin = 0
     wmid = 0
