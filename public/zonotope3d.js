@@ -32,7 +32,7 @@ function drawZonotope3D() {
                     name: 'Ground Truth',
                     mode: 'markers',
                     type: 'scatter3d',
-                    marker: { size: 5, color: 'orange' }
+                    marker: { size: 7, color: 'orange' }
             };
             var z3ddata = [trace1_3d, trace2_3d];
             var z3dlayout = {

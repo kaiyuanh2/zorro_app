@@ -126,6 +126,23 @@
                                             <div class="math">
                                                 $$ <%= expression %> $$
                                             </div>
+                                            <div class="legend mt-4">
+                                                <div id="headingGroup" class="d-none d-lg-block">
+                                                    <h4>Legend</h4>
+                                                </div>
+                                                <div class="legend-item">
+                                                    <div class="color-box" style="background-color: red;"></div>
+                                                    <p class="card-text">Red: Symbols from (Missing) Data</p>
+                                                </div>
+                                                <div class="legend-item">
+                                                    <div class="color-box" style="background-color: green;"></div>
+                                                    <p class="card-text">Green: Symbols from Non-Data</p>
+                                                </div>
+                                                <div class="legend-item">
+                                                    <div class="color-box" style="background-color: blue;"></div>
+                                                    <p class="card-text">Blue: Constant Term</p>
+                                                </div>
+                                            </div>
                                         <% } %>
                                         
                                     </div>
