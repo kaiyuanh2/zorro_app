@@ -150,7 +150,7 @@
                                                             <select class="form-select" name="feature1" id="feature1">
                                                                 <% const features_l = JSON.parse(features) %>
                                                                 <option value="" selected>--Feature 1--</option>
-                                                                <option value="offset">Offset
+                                                                <option value="f0">Offset
                                                                 </option>
                                                                 <option value="f1"><%= features_l[0] %>
                                                                 </option>
@@ -163,7 +163,7 @@
                                                         <div class="col" id="f2Select">
                                                             <select class="form-select" name="feature2" id="feature2">
                                                                 <option value="" selected>--Feature 2--</option>
-                                                                <option value="offset">Offset
+                                                                <option value="f0">Offset
                                                                 </option>
                                                                 <option value="f1"><%= features_l[0] %>
                                                                 </option>
@@ -191,7 +191,7 @@
                                                             <select class="form-select" name="feature13d" id="feature13d">
                                                                 <% const features_l = JSON.parse(features) %>
                                                                 <option value="" selected>--Feature 1--</option>
-                                                                <option value="offset">Offset
+                                                                <option value="f0">Offset
                                                                 </option>
                                                                 <option value="f1"><%= features_l[0] %>
                                                                 </option>
@@ -204,7 +204,7 @@
                                                         <div class="col" id="f2Select3D">
                                                             <select class="form-select" name="feature23d" id="feature23d">
                                                                 <option value="" selected>--Feature 2--</option>
-                                                                <option value="offset">Offset
+                                                                <option value="f0">Offset
                                                                 </option>
                                                                 <option value="f1"><%= features_l[0] %>
                                                                 </option>
@@ -217,7 +217,7 @@
                                                         <div class="col" id="f3Select3D">
                                                             <select class="form-select" name="feature33d" id="feature33d">
                                                                 <option value="" selected>--Feature 3--</option>
-                                                                <option value="offset">Offset
+                                                                <option value="f0">Offset
                                                                 </option>
                                                                 <option value="f1"><%= features_l[0] %>
                                                                 </option>
@@ -323,6 +323,8 @@
         var weights_min = [<%= weight_min %>];
         var x_labels = JSON.parse('<%- features %>')
         var robustness_ratios = [<%= robustness %>]
+        const jsonData2D = <%- JSON.stringify(json2D) %>;
+        const jsonData3D = <%- JSON.stringify(json3D) %>;
     </script>
     <script src="drawgraph.js"></script>
     <script src="zonotope.js"></script>

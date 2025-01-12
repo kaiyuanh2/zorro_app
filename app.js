@@ -8,6 +8,7 @@ const ExpressError = require('./utils/ExpressError');
 const flash = require('connect-flash');
 const {validateParameters, validateParametersPost} = require('./middleware');
 const session = require('express-session');
+const fs = require('fs');
 
 app.use(express.urlencoded({extended: true}));
 app.use(methodOverride('_method'));
@@ -50,7 +51,9 @@ app.get('/visualizations', validateParameters, (req, res) => {
     var ub = [0];
     var lb = [0];
     var x_test = [0];
-    res.render('vis', {item, test, expression, weight_max, weight_min, weight_mid, features, robustness, center, ub, lb, x_test, messages: req.flash('error')});
+    const json2D = ["a"];
+    const json3D = ["a"];
+    res.render('vis', {item, test, expression, weight_max, weight_min, weight_mid, features, robustness, center, ub, lb, x_test, json2D, json3D, messages: req.flash('error')});
 })
 
 app.post('/visualizations', validateParametersPost, (req, res) => {
@@ -92,7 +95,9 @@ app.post('/visualizations', validateParametersPost, (req, res) => {
         }
         
         console.log(features);
-        res.render('vis', {item, test, expression, weight_max, weight_min, weight_mid, features, robustness, center, ub, lb, x_test, messages: req.flash('error')});
+        const json2D = JSON.parse(fs.readFileSync('./models/ins/ins_30_2d.json', 'utf-8'));
+        const json3D = JSON.parse(fs.readFileSync('./models/ins/ins_30_3d.json', 'utf-8'));
+        res.render('vis', {item, test, expression, weight_max, weight_min, weight_mid, features, robustness, center, ub, lb, x_test, json2D, json3D, messages: req.flash('error')});
     });
 
 })
