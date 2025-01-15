@@ -138,9 +138,9 @@ def robustness_report(model, X_test, y_test, ss):
         pred = test_preds[pred_id]
         pred_range_radius = get_expr_range_radius(pred)
         pred_center = get_expr_center(pred)
-        pred_centers.append(float(pred_center))
-        pred_ub.append(float(pred_center + pred_range_radius))
-        pred_lb.append(float(pred_center - pred_range_radius))
+        pred_centers.append(round(float(pred_center), 4))
+        pred_ub.append(round(float(pred_center + pred_range_radius), 4))
+        pred_lb.append(round(float(pred_center - pred_range_radius), 4))
         pred_range_radiuses.append(pred_range_radius)
 
     for radius in robustness_radius:
@@ -154,6 +154,18 @@ def robustness_report(model, X_test, y_test, ss):
         robustness_ratios.append(float(np.mean(robustness_ls)))
 
     return robustness_ratios, pred_centers, pred_ub, pred_lb
+
+def getMissingDataIns(dirty_df, dirty_y):
+    age = []
+    children = []
+    dirty_ys = []
+    for i in range(len(dirty_df)):
+        if pd.isna(dirty_df.iloc[i]['bmi']):
+            age.append(int(dirty_df.iloc[i]['age']))
+            children.append(int(dirty_df.iloc[i]['children']))
+            dirty_ys.append(round(float(dirty_y.iloc[i]), 4))
+
+    return age, children, dirty_ys
 
     
 if __name__ == "__main__":
@@ -171,10 +183,17 @@ if __name__ == "__main__":
             y_test = pickle.load(file)
         with open('models/ins/ins_30_ss.pkl', 'rb') as file:
             ss = pickle.load(file)
+        with open('models/ins/ins_30_X_train_dirty.pkl', 'rb') as file:
+            X_train_dirty = pickle.load(file)
+        with open('models/ins/ins_30_y_train_dirty.pkl', 'rb') as file:
+            y_train_dirty = pickle.load(file)
 
         X_test_lists = []
         for i in range(len(X_test)):
             X_test_lists.append([float(j) for j in X_test.values[i].flatten().tolist()])
+
+        age, children, dy = getMissingDataIns(X_train_dirty, y_train_dirty)
+
     latex_str = "\left[\\begin{matrix}"
     weight_max = []
     weight_min = []
@@ -207,7 +226,10 @@ if __name__ == "__main__":
         "centers": pred_c,
         "ub": ub,
         "lb": lb,
-        "X_test": X_test_lists
+        "X_test": X_test_lists,
+        "missing1": age,
+        "missing2": children,
+        "missingy": dy
     }
 
     print(json.dumps(output))
