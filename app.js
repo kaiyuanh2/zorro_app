@@ -47,7 +47,6 @@ app.get('/visualizations', validateParameters, (req, res) => {
     var weight_mid = [0];
     var features = ["a"];
     var robustness = [0];
-    var center = [0];
     var ub = [0];
     var lb = [0];
     var x_test = [0];
@@ -56,7 +55,11 @@ app.get('/visualizations', validateParameters, (req, res) => {
     var missing1 = [0];
     var missing2 = [0];
     var missingy = [0];
-    res.render('vis', {item, test, expression, weight_max, weight_min, weight_mid, features, robustness, center, ub, lb, x_test, json2D, json3D, missing1, missing2, missingy, messages: req.flash('error')});
+    var clean1 = [0];
+    var clean2 = [0];
+    var cleany = [0];
+    var oneimp = [0];
+    res.render('vis', {item, test, expression, weight_max, weight_min, weight_mid, features, robustness, ub, lb, x_test, json2D, json3D, missing1, missing2, missingy, clean1, clean2, cleany, oneimp, messages: req.flash('error')});
 })
 
 app.post('/visualizations', validateParametersPost, (req, res) => {
@@ -76,6 +79,10 @@ app.post('/visualizations', validateParametersPost, (req, res) => {
     var missing1 = [0];
     var missing2 = [0];
     var missingy = [0];
+    var clean1 = [0];
+    var clean2 = [0];
+    var cleany = [0];
+    var oneimp = [0];
     const command = `python public/process.py ${item} ${test}`;
     exec(command, (err, stdout, stderr) => {
         if (err) {
@@ -94,19 +101,22 @@ app.post('/visualizations', validateParametersPost, (req, res) => {
             weight_mid = output.wt_mid;
             features = JSON.stringify(output.features);
             robustness = output.robustness;
-            center = output.centers;
             ub = output.ub;
             lb = output.lb;
             x_test = output.X_test;
             missing1 = output.missing1;
             missing2 = output.missing2;
             missingy = output.missingy;
+            clean1 = output.clean1;
+            clean2 = output.clean2;
+            cleany = output.cleany;
+            oneimp = output.oneimp;
         }
         
         console.log(features);
         const json2D = JSON.parse(fs.readFileSync('./models/ins/ins_30_2d.json', 'utf-8'));
         const json3D = JSON.parse(fs.readFileSync('./models/ins/ins_30_3d.json', 'utf-8'));
-        res.render('vis', {item, test, expression, weight_max, weight_min, weight_mid, features, robustness, center, ub, lb, x_test, json2D, json3D, missing1, missing2, missingy, messages: req.flash('error')});
+        res.render('vis', {item, test, expression, weight_max, weight_min, weight_mid, features, robustness, ub, lb, x_test, json2D, json3D, missing1, missing2, missingy, clean1, clean2, cleany, oneimp, messages: req.flash('error')});
     });
 
 })

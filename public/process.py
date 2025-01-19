@@ -122,17 +122,19 @@ def get_expr_range_radius(expr):
 def get_expr_center(expr):
     return expr.subs(dict([(symb, 0) for symb in expr.free_symbols]))
 
-def robustness_report(model, X_test, y_test, ss):
-    y_test_sp = sympy.Matrix(y_test.to_numpy().reshape(-1, 1))
-    X_test_sp = sympy.Matrix(np.append(np.ones((len(X_test), 1)), ss.transform(X_test), axis=1))
+def robustness_report(model, model_oi, X_test, ss):
+    # y_test_sp = sympy.Matrix(y_test.to_numpy().reshape(-1, 1))
+    X_test_ss = np.append(np.ones((len(X_test), 1)), ss.transform(X_test), axis=1)
+    X_test_sp = sympy.Matrix(X_test_ss)
     test_preds = X_test_sp*model
-    radius_base = np.median(y_test)
-    robustness_radius = [r * radius_base for r in [0.01, 0.02, 0.03, 0.05, 0.10, 0.20]]
+    radius_base = 1000
+    robustness_radius = [r * radius_base for r in [0.1, 0.2, 0.3, 0.5, 0.75, 1]]
     robustness_ratios = []
     pred_range_radiuses = []
     pred_centers = []
     pred_ub = []
     pred_lb = []
+    pred_oi = []
 
     for pred_id in range(len(test_preds)):
         pred = test_preds[pred_id]
@@ -142,6 +144,13 @@ def robustness_report(model, X_test, y_test, ss):
         pred_ub.append(round(float(pred_center + pred_range_radius), 4))
         pred_lb.append(round(float(pred_center - pred_range_radius), 4))
         pred_range_radiuses.append(pred_range_radius)
+        oi_pred = 0
+        for j in range(len(model_oi)):
+            if j == 0:
+                oi_pred += model_oi[j]
+            else:
+                oi_pred += model_oi[j] * X_test_ss[pred_id, j]
+        pred_oi.append(round(float(oi_pred), 4))
 
     for radius in robustness_radius:
         robustness_ls = []
@@ -153,19 +162,26 @@ def robustness_report(model, X_test, y_test, ss):
 
         robustness_ratios.append(float(np.mean(robustness_ls)))
 
-    return robustness_ratios, pred_centers, pred_ub, pred_lb
+    return robustness_ratios, pred_centers, pred_ub, pred_lb, pred_oi
 
 def getMissingDataIns(dirty_df, dirty_y):
     age = []
     children = []
     dirty_ys = []
+    cage = []
+    cchildren = []
+    cy = []
     for i in range(len(dirty_df)):
         if pd.isna(dirty_df.iloc[i]['bmi']):
             age.append(int(dirty_df.iloc[i]['age']))
             children.append(int(dirty_df.iloc[i]['children']))
-            dirty_ys.append(round(float(dirty_y.iloc[i]), 4))
+            dirty_ys.append(round(float(dirty_y.iloc[i])))
+        else:
+            cage.append(int(dirty_df.iloc[i]['age']))
+            cchildren.append(int(dirty_df.iloc[i]['children']))
+            cy.append(round(float(dirty_y.iloc[i])))
 
-    return age, children, dirty_ys
+    return age, children, dirty_ys, cage, cchildren, cy
 
     
 if __name__ == "__main__":
@@ -177,10 +193,14 @@ if __name__ == "__main__":
         with open('models/ins/ins_30_model.pkl', 'rb') as file:
             model = pickle.load(file)
         features_list = ["age", "bmi", "children"]
-        with open('models/ins/ins_30_X_test.pkl', 'rb') as file:
-            X_test = pickle.load(file)
-        with open('models/ins/ins_30_y_test.pkl', 'rb') as file:
-            y_test = pickle.load(file)
+        with open('models/ins/ins_30_model_1imp.pkl', 'rb') as file:
+            model_one = pickle.load(file)
+        if test == "t1":
+            with open('models/ins/ins_30_X_test_s1.pkl', 'rb') as file:
+                X_test = pickle.load(file)
+        if test == "t2":
+            with open('models/ins/ins_30_X_test_s2.pkl', 'rb') as file:
+                X_test = pickle.load(file)
         with open('models/ins/ins_30_ss.pkl', 'rb') as file:
             ss = pickle.load(file)
         with open('models/ins/ins_30_X_train_dirty.pkl', 'rb') as file:
@@ -192,7 +212,7 @@ if __name__ == "__main__":
         for i in range(len(X_test)):
             X_test_lists.append([float(j) for j in X_test.values[i].flatten().tolist()])
 
-        age, children, dy = getMissingDataIns(X_train_dirty, y_train_dirty)
+        dage, dchildren, dy, age, children, cy = getMissingDataIns(X_train_dirty, y_train_dirty)
 
     latex_str = "\left[\\begin{matrix}"
     weight_max = []
@@ -212,7 +232,7 @@ if __name__ == "__main__":
 
     latex_str += "\end{matrix}\\right]"
 
-    robustness, pred_c, ub, lb = robustness_report(model, X_test, y_test, ss)
+    robustness, pred_c, ub, lb, oip = robustness_report(model, model_one, X_test, ss)
 
     # print(weight_max, file=sys.stderr)
 
@@ -227,9 +247,13 @@ if __name__ == "__main__":
         "ub": ub,
         "lb": lb,
         "X_test": X_test_lists,
-        "missing1": age,
-        "missing2": children,
-        "missingy": dy
+        "missing1": dage,
+        "missing2": dchildren,
+        "missingy": dy,
+        "clean1": age,
+        "clean2": children,
+        "cleany": cy,
+        "oneimp": oip
     }
 
     print(json.dumps(output))

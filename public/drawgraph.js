@@ -6,7 +6,7 @@ var stats = { x: x_labels, y: weights,
     mode: 'markers' };
 var data = [stats];
 var layout = {
-    title: 'Ranges of Abstract Model Weights',
+    title: '<b>Ranges of Abstract Model Weights</b>',
     xaxis: { title: 'Features' }, yaxis: { title: 'Weights', tickformat: '.4f' }
  };
 Plotly.newPlot('weightGraph', data, layout);
@@ -18,8 +18,8 @@ var trace_robust = {
 };
 var data_robust = [trace_robust];
 var layout_robust = {
-    title: 'Robustness Ratio Under Different Robustness Radius',
-    xaxis: { title: 'Robustness Radius = Percentage of Median of y_test', tickvals: [1, 2, 3, 4, 5, 6], ticktext: ["1%", "2%", "3%", "5%", "10%", "20%"] },
+    title: '<b>Robustness Ratio Under Different Robustness Radius</b>',
+    xaxis: { title: 'Robustness Radius', tickvals: [1, 2, 3, 4, 5, 6], ticktext: ["100", "200", "300", "500", "750", "1000"] },
     yaxis: { title: 'Robustness Ratio', tickformat: ',.0%' }
 };
 Plotly.newPlot('robustnessGraph', data_robust, layout_robust);
@@ -34,23 +34,34 @@ function drawMissing() {
         missingG.innerHTML = '<div id="missingGraph"></div>'
         if (fmDropdown.value == 'f1') {
             var missing_x = missing_f1;
+            var clean_x = clean_f1;
             var xlabel = x_labels[0]
         } else if (fmDropdown.value == 'f2') {
             var missing_x = missing_f2;
+            var clean_x = clean_f2;
             var xlabel = x_labels[2]
         }
 
         var trace_missing = {
             x: missing_x,
             y: missing_y,
+            name: 'Data Points with Features Missing',
             mode: 'markers',
             type: 'scatter',
-            marker: { size: 10}
+            marker: { size: 10, color: "red" }
         };
-        var data_missing = [trace_missing];
+        var trace_clean = {
+            x: clean_x,
+            y: clean_y,
+            name: 'Clean Data Points',
+            mode: 'markers',
+            type: 'scatter',
+            marker: { size: 10, color: "blue" }
+        };
+        var data_missing = [trace_clean, trace_missing];
         var layout_missing = {
-            title: 'Distribution of Missing Data Points',
-            xaxis: { title: xlabel }, yaxis: { title: 'Label', tickformat: '.4f'  }
+            title: '<b>Distribution of Missing Data Points</b>',
+            xaxis: { title: xlabel }, yaxis: { title: 'charges', tickformat: '.0f' }
          };
         Plotly.newPlot('missingGraph', data_missing, layout_missing);
     }

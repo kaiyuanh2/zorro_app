@@ -18,20 +18,20 @@
             </div>
             <% } %>
 
-            <div class="row align-items-center mt-3">
+            <div class="row align-items-center mt-3 mb-2">
                 <div class="col-md-3">
                     <button type="button" class="btn btn-success"
                             onclick="window.location.href='/'"><strong>+</strong> Upload New Train Set</button>
-                            <button type="button" class="btn btn-success"
+                    <button type="button" class="btn btn-success"
                             onclick="window.location.href='/'"><strong>+</strong> Upload New Test Set</button>
                 </div>
             </div>            
 
-                <div class="row align-items-center mt-3 mb-3">
-                    <div class="col">
-                        <div class="card mx-auto w-200">
+                <div class="row align-items-center mt-5 mb-3 justify-content-center">
+                    <div class="col-md-12 mx-auto">
+                        <div class="card w-100 h-100">
                             <div class="card-header">
-                                <div class="row mt-1 mb-1"><strong>Select Dataset</strong></div>
+                                <div class="row mt-1 mb-1 p-1"><h4><b>Select Dataset</b></h4></div>
                             </div>
                             <div class="card-block p-2">
                                 <form id="display_options" action="/visualizations" method="POST">
@@ -94,8 +94,8 @@
                     </div>
                 </div>
 
-                <div class="row d-flex align-items-stretch mt-5">
-                    <div class="col d-flex">
+                <div class="row align-items-center mt-5 justify-content-center">
+                    <div class="col-md-12 mx-auto">
                         <div class="card w-100 h-100">
                             <div class="card-header mt-2">
                                 <ul class="nav nav-pills card-header-pills" id="tabline" role="tablist">
@@ -105,11 +105,11 @@
                                         Missing Data Distribution
                                         </a>
                                     </li>
-                                    <li class="nav-item">
+                                    <!-- <li class="nav-item">
                                         <a class="nav-link" id="tab12-tab" data-bs-toggle="tab" href="#tab12" role="tab" aria-controls="tab12" aria-selected="false">
                                         Imputers
                                         </a>
-                                    </li>
+                                    </li> -->
                             </ul>
                         </div>
                         <div class="card-body p-3">
@@ -152,7 +152,7 @@
                 </div>
 
 
-                <div class="row d-flex align-items-stretch mt-5">
+                <div class="row align-items-stretch mt-5 mb-5 justify-content-center">
                     <div class="col-md-6 d-flex">
                         <div class="card w-100 h-100">
                             <div class="card-header mt-2">
@@ -367,19 +367,19 @@
                                                                 <% for (var c in features_list) { %>
                                                                     <th scope="col"><%= features_list[c] %></th>
                                                                 <% } %>
-                                                                <th scope="col" class="thick-border">Prediction Center</th>
-                                                                <th scope="col">Prediction Range</th>
+                                                                <th scope="col" class="thick-border">Prediction Range</th>
+                                                                <th scope="col">Single-Imputer Prediction</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            <% for (var i=0; i<center.length; i++) { %>
+                                                            <% for (var i=0; i<x_test.length; i++) { %>
                                                                 <tr>
                                                                     <th scope="row"><%= i+1 %></th>
                                                                     <% for (var j in x_test[i]) { %>
                                                                         <td><%= x_test[i][j] %></td>
                                                                     <% } %>
-                                                                    <td class="thick-border"><%= center[i] %></td>
-                                                                    <td>[<%= lb[i] %>, <%= ub[i] %>]</td>
+                                                                    <td class="thick-border">[<%= lb[i] %>, <%= ub[i] %>]</td>
+                                                                    <td><%= oneimp[i] %></td>
                                                                 </tr>
                                                             <% } %>
                                                         </tbody>
@@ -412,6 +412,10 @@
         var missing_f1 = [<%= missing1 %>];
         var missing_f2 = [<%= missing2 %>];
         var missing_y = [<%= missingy %>];
+        var clean_f1 = [<%= clean1 %>];
+        var clean_f2 = [<%= clean2 %>];
+        var clean_y = [<%= cleany %>];
+        var oneimputer = [<%= oneimp %>];
     </script>
     <script src="drawgraph.js"></script>
     <script src="zonotope.js"></script>

@@ -35,8 +35,8 @@ function drawZonotope() {
             };
             var zdata = [trace1, trace2];
             var zlayout = {
-                title: '2D Zonotope',
-                xaxis: { title: 'Feature 1', tickformat: '.4f' }, yaxis: { title: 'Feature 2', tickformat: '.4f' }
+                title: '<b>2D Zonotope</b>',
+                xaxis: { title: f1Dropdown.value, tickformat: '.4f' }, yaxis: { title: f2Dropdown.value, tickformat: '.4f' }
             };
             Plotly.newPlot('zonotopeGraph', zdata, zlayout);
         }

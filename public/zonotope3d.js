@@ -36,9 +36,9 @@ function drawZonotope3D() {
             };
             var z3ddata = [trace1_3d, trace2_3d];
             var z3dlayout = {
-                title: '3D Zonotope',
+                title: '<b>3D Zonotope</b>',
                 showlegend: true,
-                scene: {xaxis: { title: 'Feature 1', tickformat: '.4f' }, yaxis: { title: 'Feature 2', tickformat: '.4f' }, zaxis: { title: 'Feature 3', tickformat: '.4f' }}
+                scene: {xaxis: { title: f1Dropdown3d.value, tickformat: '.4f' }, yaxis: { title: f2Dropdown3d.value, tickformat: '.4f' }, zaxis: { title: f3Dropdown3d.value, tickformat: '.4f' }}
             };
             Plotly.newPlot('zonotopeGraph3D', z3ddata, z3dlayout);
         }
