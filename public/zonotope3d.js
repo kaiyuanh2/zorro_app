@@ -38,7 +38,7 @@ function drawZonotope3D() {
             var z3dlayout = {
                 title: '<b>3D Zonotope</b>',
                 showlegend: true,
-                scene: {xaxis: { title: f1Dropdown3d.value, tickformat: '.4f' }, yaxis: { title: f2Dropdown3d.value, tickformat: '.4f' }, zaxis: { title: f3Dropdown3d.value, tickformat: '.4f' }}
+                scene: {xaxis: { title: "Feature 1", tickformat: '.0f' }, yaxis: { title: "Feature 2", tickformat: '.0f' }, zaxis: { title: "Feature 3", tickformat: '.0f' }}
             };
             Plotly.newPlot('zonotopeGraph3D', z3ddata, z3dlayout);
         }

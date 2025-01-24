@@ -83,7 +83,7 @@ app.post('/visualizations', validateParametersPost, (req, res) => {
     var clean2 = [0];
     var cleany = [0];
     var oneimp = [0];
-    const command = `python public/process.py ${item} ${test}`;
+    const command = `python3 public/process.py ${item} ${test}`;
     exec(command, (err, stdout, stderr) => {
         if (err) {
             console.error(`Error: ${err.message}`);

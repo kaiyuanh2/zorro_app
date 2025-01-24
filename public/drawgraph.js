@@ -7,9 +7,26 @@ var stats = { x: x_labels, y: weights,
 var data = [stats];
 var layout = {
     title: '<b>Ranges of Abstract Model Weights</b>',
-    xaxis: { title: 'Features' }, yaxis: { title: 'Weights', tickformat: '.4f' }
+    xaxis: { title: 'Features' }, yaxis: { title: 'Weights', tickformat: '.0f' }
  };
 Plotly.newPlot('weightGraph', data, layout);
+
+weightGraph.on('plotly_click', function(eventData){
+    var pt = eventData.points[0];
+    var trace = pt.data;
+    var tidx = pt.pointNumber;
+    var ptx = pt.x;
+    var pty = pt.y;
+    var deltay = pty;
+    if (trace.error_y) {
+        deltay = trace.error_y.array[tidx] * 2;
+    }
+        
+    var update = {
+        'yaxis.range': [pty - deltay, pty + deltay]
+    }; 
+    Plotly.relayout('weightGraph', update);
+});
 
 var trace_robust = {
     x: [1, 2, 3, 4, 5, 6],

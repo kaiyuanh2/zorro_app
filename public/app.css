@@ -68,4 +68,14 @@ body {
     border-left: 3px solid black !important;
 }
 
+.td-highlight {
+    color: #00aaff !important;
+    font-weight: bold !important;
+}
+
 .color-box { width: 20px; height: 20px; margin-right: 10px; }
+
+.card-header {
+    padding-top: 2 !important;
+    margin-top: 0 !important;
+}

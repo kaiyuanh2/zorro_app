@@ -53,9 +53,22 @@ def add_red(match):
 def add_green(match):
     return "\\textcolor{green}{" + match.group(0) + "}"
 
+def round_coeff(expr, ndigits=4):
+    new_expr = 0
+    
+    for term in expr.as_ordered_terms():
+        coeff, symbolic = term.as_independent(*expr.free_symbols)
+        coeff_rounded = round(coeff, ndigits)
+        new_expr += coeff_rounded * symbolic
+    
+    return new_expr
+
 def simplify_expression(expr) -> str:
     data_count = 0
     nd_count = 0
+    print(expr, file=sys.stderr)
+    expr = round_coeff(expr)
+    print(expr, file=sys.stderr)
     symbols_list = list(expr.free_symbols)
     force_plus = ForcePlus()
     for s in symbols_list:
@@ -140,9 +153,9 @@ def robustness_report(model, model_oi, X_test, ss):
         pred = test_preds[pred_id]
         pred_range_radius = get_expr_range_radius(pred)
         pred_center = get_expr_center(pred)
-        pred_centers.append(round(float(pred_center), 4))
-        pred_ub.append(round(float(pred_center + pred_range_radius), 4))
-        pred_lb.append(round(float(pred_center - pred_range_radius), 4))
+        pred_centers.append(round(float(pred_center)))
+        pred_ub.append(round(float(pred_center + pred_range_radius)))
+        pred_lb.append(round(float(pred_center - pred_range_radius)))
         pred_range_radiuses.append(pred_range_radius)
         oi_pred = 0
         for j in range(len(model_oi)):
@@ -150,7 +163,7 @@ def robustness_report(model, model_oi, X_test, ss):
                 oi_pred += model_oi[j]
             else:
                 oi_pred += model_oi[j] * X_test_ss[pred_id, j]
-        pred_oi.append(round(float(oi_pred), 4))
+        pred_oi.append(round(float(oi_pred), 2))
 
     for radius in robustness_radius:
         robustness_ls = []
