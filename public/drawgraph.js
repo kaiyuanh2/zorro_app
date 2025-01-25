@@ -7,7 +7,8 @@ var stats = { x: x_labels, y: weights,
 var data = [stats];
 var layout = {
     title: '<b>Ranges of Abstract Model Weights</b>',
-    xaxis: { title: 'Features' }, yaxis: { title: 'Weights', tickformat: '.0f' }
+    xaxis: { title: 'Features' }, yaxis: { title: 'Weights', tickformat: '.0f' },
+    height: 350
  };
 Plotly.newPlot('weightGraph', data, layout);
 
@@ -37,7 +38,8 @@ var data_robust = [trace_robust];
 var layout_robust = {
     title: '<b>Robustness Ratio Under Different Robustness Radius</b>',
     xaxis: { title: 'Robustness Radius', tickvals: [1, 2, 3, 4, 5, 6], ticktext: ["100", "200", "300", "500", "750", "1000"] },
-    yaxis: { title: 'Robustness Ratio', tickformat: ',.0%' }
+    yaxis: { title: 'Robustness Ratio', tickformat: ',.0%' },
+    height: 350
 };
 Plotly.newPlot('robustnessGraph', data_robust, layout_robust);
 
@@ -78,7 +80,8 @@ function drawMissing() {
         var data_missing = [trace_clean, trace_missing];
         var layout_missing = {
             title: '<b>Distribution of Missing Data Points</b>',
-            xaxis: { title: xlabel }, yaxis: { title: 'charges', tickformat: '.0f' }
+            xaxis: { title: xlabel }, yaxis: { title: 'charges', tickformat: '.0f' },
+            height: 350
          };
         Plotly.newPlot('missingGraph', data_missing, layout_missing);
     }
