@@ -11,7 +11,7 @@ function drawZonotope3D() {
     if (!f1Dropdown3d.value || !f2Dropdown3d.value || !f3Dropdown3d.value) {
         zonotopeG3d.innerHTML = '<p class="card-text">Select 3 different features (including offset) to show zonotope.</p>'
     } else if ((f1Dropdown3d.value === f2Dropdown3d.value) || (f1Dropdown3d.value === f3Dropdown3d.value) || (f2Dropdown3d.value === f3Dropdown3d.value)) {
-        zonotopeG3d.innerHTML = '<p class="card-text">At least 2 features are the same. Check the dropdowns and try again.</p>'
+        zonotopeG3d.innerHTML = '<p class="card-text">At least 2 features are the same. Check your selections and try again.</p>'
     } else {
         zonotopeG3d.innerHTML = '<div id="zonotopeGraph3D"></div>'
         const keys3D = Object.keys(jsonData3D);

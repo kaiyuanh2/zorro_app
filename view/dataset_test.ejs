@@ -1,7 +1,7 @@
 <% layout('layouts/boilerplate') %>
 
     <div id="headingGroup" class="text-center d-none d-lg-block mt-3">
-        <h1>Upload New Training Dataset</h1>
+        <h1>Upload New Testing Dataset</h1>
     </div>
 
     <% if(success && success.length) { %>
@@ -21,35 +21,27 @@
             <div class="card-body">
                 <p>Please follow the format described in the documentation below and read the warnings carefully. By clicking "Upload", you agree to all the terms and conditions listed below.</p>
                 <div class="row align-items-center mt-3">
-                    <form id="custom_train_upload" action="/dataset" method="POST" enctype="multipart/form-data">
+                    <form id="custom_test_upload" action="/test-dataset" method="POST" enctype="multipart/form-data">
                         <div class="row align-items-center mt-3">
                             <div class="col-12">
-                                <label for="fileSelect" class="form-label">Upload training features with data quality issues here:</label>
-                                <input type="file" id="dataSet" name="dataSet" class="form-control" accept=".csv, .xlsx, .xls"
+                                <label for="fileSelect" class="form-label">Upload testing features here:</label>
+                                <input type="file" id="dataSetTest" name="dataSetTest" class="form-control" accept=".csv, .xlsx, .xls"
                                     max="1000000" required>
                             </div>
                         </div>
 
                         <div class="row align-items-center mt-3">
                             <div class="col-12">
-                                <label for="fileSelect" class="form-label">Upload training features without data quality issues here:</label>
-                                <input type="file" id="dataClean" name="dataClean" class="form-control" accept=".csv, .xlsx, .xls"
-                                    max="1000000" required>
-                            </div>
-                        </div>
-
-                        <div class="row align-items-center mt-3">
-                            <div class="col-12">
-                                <label for="fileSelect" class="form-label">Upload training labels here:</label>
-                                <input type="file" id="dataLabel" name="dataLabel" class="form-control" accept=".csv, .xlsx, .xls"
+                                <label for="fileSelect" class="form-label">Upload testing labels here:</label>
+                                <input type="file" id="dataLabelTest" name="dataLabelTest" class="form-control" accept=".csv, .xlsx, .xls"
                                     max="1000000" required>
                             </div>
                         </div>
 
                         <div class="row align-items-center mt-3">
                             <div class="col-10">
-                                <label for="dataName" class="form-label">Name of Dataset (required):</label>
-                                <input type="text" id="dataName" name="dataName" class="form-control" required>
+                                <label for="testSetName" class="form-label">Name of Dataset (required, please strictly match training set name):</label>
+                                <input type="text" id="testSetName" name="testSetName" class="form-control" required>
                             </div>
                             <div class="col-2 d-flex justify-content-center align-items-center">
                                 <button type="submit" class="btn btn-primary btn-lg"><strong>+</strong> Upload</button>
@@ -87,7 +79,7 @@
             <p style='margin-top:3.0pt;margin-right:0in;
             margin-left:1.0in;margin-bottom:.0001pt;text-indent:-.25in;line-height:normal'>1.&nbsp;&nbsp;A smaller dataset will have much faster processing time.</p>
             <p style='margin-top:3.0pt;margin-right:0in;
-            margin-left:1.0in;margin-bottom:.0001pt;text-indent:-.25in;line-height:normal'>2.&nbsp;&nbsp;Use different file names for features and labels.</p>
+            margin-left:1.0in;margin-bottom:.0001pt;text-indent:-.25in;line-height:normal'>2.&nbsp;&nbsp;Make sure the dataset name matches the name of uploaded training dataset.</p>
         </div>
 
         <br>

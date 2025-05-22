@@ -11,6 +11,10 @@ var layout = {
  };
 Plotly.newPlot('weightGraph', data, layout);
 
+function isFPattern(str) {
+    return /^f\d+$/.test(str);
+  }
+
 weightGraph.on('plotly_click', function(eventData){
     var pt = eventData.points[0];
     var trace = pt.data;
@@ -49,15 +53,29 @@ function drawMissing() {
         missingG.innerHTML = '<p class="card-text">Select a non-missing feature from above.</p>'
     } else {
         missingG.innerHTML = '<div id="missingGraph"></div>'
-        if (fmDropdown.value == 'f1') {
-            var missing_x = missing_f1;
-            var clean_x = clean_f1;
-            var xlabel = x_labels[0]
-        } else if (fmDropdown.value == 'f2') {
-            var missing_x = missing_f2;
-            var clean_x = clean_f2;
-            var xlabel = x_labels[2]
+
+        if (isFPattern(fmDropdown.value)) {
+            const idx = Number(fmDropdown.value.slice(1))
+            var missing_x = missing_f[idx - 1];
+            var clean_x = clean_f[idx - 1];
+            var new_index = idx - 1;
+            if (new_index >= missing_column) {
+                new_index = new_index + 1;
+            }
+            var xlabel = x_labels[new_index];
         }
+
+        // if (fmDropdown.value == 'f1') {
+        //     const idx = Number(fmDropdown.value.slice(1))
+        //     var missing_x = missing_f[idx - 1];
+        //     var clean_x = clean_f[idx - 1];
+        //     var xlabel = x_labels[0];
+        // } else if (fmDropdown.value == 'f2') {
+        //     const idx = Number(fmDropdown.value.slice(1))
+        //     var missing_x = missing_f[idx - 1];
+        //     var clean_x = clean_f[idx - 1];
+        //     var xlabel = x_labels[2];
+        // }
 
         var trace_missing = {
             x: missing_x,

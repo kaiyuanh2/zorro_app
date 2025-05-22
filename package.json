@@ -8,8 +8,10 @@
     "joi": "^17.9.2",
     "leaflet-geoserver-request": "^1.2.2",
     "method-override": "^3.0.0",
+    "multer": "^1.4.5-lts.2",
     "nodemon": "^3.1.9",
     "nodeplotlib": "^0.7.7",
+    "python-shell": "^5.0.0",
     "sanitize-html": "^2.10.0"
   }
 }

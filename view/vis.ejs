@@ -21,9 +21,9 @@
             <div class="row align-items-center mt-3 mb-2">
                 <div class="col-md-3">
                     <button type="button" class="btn btn-success"
-                            onclick="window.location.href='/'"><strong>+</strong> Upload New Train Set</button>
+                            onclick="window.location.href='/dataset'"><strong>+</strong> Upload New Train Set</button>
                     <button type="button" class="btn btn-success"
-                            onclick="window.location.href='/'"><strong>+</strong> Upload New Test Set</button>
+                            onclick="window.location.href='/test-dataset'"><strong>+</strong> Upload New Test Set</button>
                 </div>
             </div>            
 
@@ -38,30 +38,38 @@
                                     <div class="form-group row mt-2 align-items-center">
                                         <div class="col-md-10" id="datasetSelect">
                                             <select class="form-select" name="item" id="item">
-                                                <option value="" selected>--Dataset--</option>
-                                                <option value="i1" <%=item==="i1" ? 'selected' : '' %>>Insurance
-                                                </option>
-                                                <option value="i2" <%=item==="i2" ? 'selected' : '' %>>German
-                                                </option>
-                                                <option value="i3" <%=item==="i3" ? 'selected' : '' %>>MPG
-                                                </option>
+                                                <option value="" selected>--Training Set--</option>
+                                                <option value="Insurance" <%=item==="Insurance" ? 'selected' : '' %>>Insurance</option>
+
+                                                <% for (let i=1; i<keys.length; i++) { %>
+                                                    <option value="<%= keys[i] %>" <%=item===keys[i] ? 'selected' : '' %>><%= keys[i] %></option>
+                                                <% } %>
                                             </select>
                                         </div>
-                                        <div class="col-md-5" id="testSelect">
+                                        <!-- Initially hidden elements -->
+                                        <div class="col-md-3" id="testSelect">
                                             <select class="form-select" name="test" id="test">
                                                 <option value="" selected>--Test Set--</option>
-                                                <option value="t1" <%=test==="t1" ? 'selected' : '' %>>Test Set 1
-                                                </option>
-                                                <option value="t2" <%=test==="t2" ? 'selected' : '' %>>Test Set 2
-                                                </option>
+                                                <% if (item) { %>
+                                                    <% const count = lengthMap[item] || 0; %>
+                                                    <% for (let i=1; i<=count; i++) { %>
+                                                        <option value="t<%= i %>" <%=test==="t"+i ? 'selected' : '' %>>Test Set <%= i %></option>
+                                                    <% } %>
+                                                <% } %>
                                             </select>
                                         </div>
-                                        <div class="col-md-1">
-                                            <button type="button" class="btn btn-info" data-bs-toggle="modal"
-                                                data-bs-target="#helpModal"><strong>?</strong> Help</button>
+                                        <div class="col-md-2 me-1" id="learningRate">
+                                            <input type="number" class="form-control" id="lr" name="lr" step="0.01" placeholder="Learning Rate" required>
                                         </div>
+                                        <div class="col-md-1 ms-1" id="regularization">
+                                            <input type="number" class="form-control" id="reg" name="reg" placeholder="Regularization" required>
+                                        </div>
+                                        <!-- Always visible elements -->
                                         <div class="col-md-1">
-                                            <button type="submit" class="btn btn-primary">Confirm</button>
+                                            <button type="button" class="btn btn-info w-100" data-bs-toggle="modal" data-bs-target="#helpModal"><strong>?</strong> Get Help</button>
+                                        </div>
+                                        <div class="col-md-auto">
+                                            <button type="submit" class="btn btn-primary w-100">Confirm</button>
                                         </div>
                                     </div>
     
@@ -76,12 +84,12 @@
                                                 </div>
                                                 <div class="modal-body">
                                                     <div class="form-group row mt-2 align-items-center">
-                                                        <p><label><b>--Dataset--</b> Choose an uploaded dataset to run ZORRO on it, if you do not see the dataset you are looking for, please upload using the button below.</label></p>
-                                                        <p>After selecting a dataset, click "Confirm" to show corresponding visualizations.</p>
+                                                        <p><label><b>--Dataset--</b> Choose an uploaded dataset to run ZORRO predictions on it, if you do not see the dataset you are looking for, please upload using the button below.</label></p>
+                                                        <p>After selecting a training and testing dataset, input desired learning rate and regularization values, click "Confirm" to show corresponding visualizations.</p>
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-success"
-                                                        onclick="window.location.href='/'"><strong>+</strong> Upload a Dataset</button>
+                                                        onclick="window.location.href='/dataset'"><strong>+</strong> Upload a Training Dataset</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -89,6 +97,10 @@
                                     </div>
     
                                 </form>
+                                <div class="mt-3">
+                                    <p>!!! If the training dataset is selected for visualization for the first time, or there is any change in LR/regularization comparing to previous model, a long loading time is expected due to live model (re-)training and visualization generations.</p>
+                                </div>
+                                
                             </div>
                         </div>
                     </div>
@@ -124,12 +136,15 @@
                                                 <div class="form-group row mt-2 align-items-center">
                                                     <div class="col-md-3" id="fSelect">
                                                         <select class="form-select" name="featurem" id="featurem">
-                                                            <!-- <% const features_l = JSON.parse(features) %> -->
+                                                            <% const features_l = JSON.parse(features) %>
                                                             <option value="" selected>--Non-Missing Feature--</option>
-                                                            <option value="f1">age
-                                                            </option>
-                                                            <option value="f2">children
-                                                            </option>
+                                                            <% var counter = 0; %>
+                                                            <% for (var i=0; i<features_l.length; i++) { %>
+                                                                <% if (features_l[i] != missing_f) { %>
+                                                                    <% counter += 1; %>
+                                                                <option value="f<%= counter %>"><%= features_l[i] %></option>
+                                                                <% } %>
+                                                            <% } %>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -137,7 +152,7 @@
                                         </div>
                                         <div class="mt-2" id="missingG">
                                         </div>
-                                        <div class="mt-2"><p class="card-text">Missing feature: bmi</p></div>
+                                        <div class="mt-2"><p class="card-text">Missing feature: <%= missing_f %></p></div>
                                     <% } %>
                                 </div>
                                 <div class="tab-pane fade" id="tab12" role="tabpanel" aria-labelledby="tab12-tab">
@@ -235,29 +250,21 @@
                                                     <div class="form-group row mt-2 align-items-center">
                                                         <div class="col" id="f1Select">
                                                             <select class="form-select" name="feature1" id="feature1">
-                                                                <% const features_l = JSON.parse(features) %>
+                                                                <!-- <% const features_l = JSON.parse(features) %> -->
                                                                 <option value="" selected>--Feature 1--</option>
-                                                                <option value="f0">Offset
-                                                                </option>
-                                                                <option value="f1"><%= features_l[0] %>
-                                                                </option>
-                                                                <option value="f2"><%= features_l[1] %>
-                                                                </option>
-                                                                <option value="f3"><%= features_l[2] %>
-                                                                </option>
+                                                                <option value="f0">Offset</option>
+                                                                <% for (var i=0; i<features_l.length; i++) { %>
+                                                                    <option value="f<%= i+1 %>"><%= features_l[i] %></option>
+                                                                <% } %>
                                                             </select>
                                                         </div>
                                                         <div class="col" id="f2Select">
                                                             <select class="form-select" name="feature2" id="feature2">
                                                                 <option value="" selected>--Feature 2--</option>
-                                                                <option value="f0">Offset
-                                                                </option>
-                                                                <option value="f1"><%= features_l[0] %>
-                                                                </option>
-                                                                <option value="f2"><%= features_l[1] %>
-                                                                </option>
-                                                                <option value="f3"><%= features_l[2] %>
-                                                                </option>
+                                                                <option value="f0">Offset</option>
+                                                                <% for (var i=0; i<features_l.length; i++) { %>
+                                                                    <option value="f<%= i+1 %>"><%= features_l[i] %></option>
+                                                                <% } %>
                                                             </select>
                                                         </div>
                                                     </div>
@@ -271,6 +278,9 @@
                                     <% if (expression=='' ) { %>
                                             <div><p class="card-text">Nothing is selected.</p></div>
                                         <% } else { %>
+                                            <% if (item != "Insurance") { %>
+                                                <div><p class="card-text">Sorry, 3D zonotope visualization is not available for this dataset.</p></div>
+                                            <% } else { %>
                                             <div id="zonotopeForm3D">
                                                 <form id="zonotopeForm3D" action="" method="">
                                                     <div class="form-group row mt-2 align-items-center">
@@ -278,40 +288,28 @@
                                                             <select class="form-select" name="feature13d" id="feature13d">
                                                                 <% const features_l = JSON.parse(features) %>
                                                                 <option value="" selected>--Feature 1--</option>
-                                                                <option value="f0">Offset
-                                                                </option>
-                                                                <option value="f1"><%= features_l[0] %>
-                                                                </option>
-                                                                <option value="f2"><%= features_l[1] %>
-                                                                </option>
-                                                                <option value="f3"><%= features_l[2] %>
-                                                                </option>
+                                                                <option value="f0">Offset</option>
+                                                                <% for (var i=0; i<features_l.length; i++) { %>
+                                                                    <option value="f<%= i+1 %>"><%= features_l[i] %></option>
+                                                                <% } %>
                                                             </select>
                                                         </div>
                                                         <div class="col" id="f2Select3D">
                                                             <select class="form-select" name="feature23d" id="feature23d">
                                                                 <option value="" selected>--Feature 2--</option>
-                                                                <option value="f0">Offset
-                                                                </option>
-                                                                <option value="f1"><%= features_l[0] %>
-                                                                </option>
-                                                                <option value="f2"><%= features_l[1] %>
-                                                                </option>
-                                                                <option value="f3"><%= features_l[2] %>
-                                                                </option>
+                                                                <option value="f0">Offset</option>
+                                                                <% for (var i=0; i<features_l.length; i++) { %>
+                                                                    <option value="f<%= i+1 %>"><%= features_l[i] %></option>
+                                                                <% } %>
                                                             </select>
                                                         </div>
                                                         <div class="col" id="f3Select3D">
                                                             <select class="form-select" name="feature33d" id="feature33d">
                                                                 <option value="" selected>--Feature 3--</option>
-                                                                <option value="f0">Offset
-                                                                </option>
-                                                                <option value="f1"><%= features_l[0] %>
-                                                                </option>
-                                                                <option value="f2"><%= features_l[1] %>
-                                                                </option>
-                                                                <option value="f3"><%= features_l[2] %>
-                                                                </option>
+                                                                <option value="f0">Offset</option>
+                                                                <% for (var i=0; i<features_l.length; i++) { %>
+                                                                    <option value="f<%= i+1 %>"><%= features_l[i] %></option>
+                                                                <% } %>
                                                             </select>
                                                         </div>
                                                     </div>
@@ -319,6 +317,7 @@
                                             </div>
                                             <div class="mt-2" id="zonotopeG3D"></div>
                                         <% } %>
+                                    <% } %>
                                 </div>
                             </div>
                         </div>
@@ -357,6 +356,12 @@
                                     <% if (expression=='' ) { %>
                                             <div><p class="card-text">Nothing is selected.</p></div>
                                         <% } else { %>
+                                                <div id="headingGroup" class="text-center d-none d-lg-block mt-2">
+                                                    <h3>Prediction Ranges</h3>
+                                                </div>
+                                                <div class="mt-3">
+                                                    <div id="predictionGraph"></div>
+                                                </div>  
                                             <div id="headingGroup" class="text-center d-none d-lg-block mt-2">
                                                 <h3>Table of Test Dataset and Prediction Ranges</h3>
                                             </div>
@@ -412,8 +417,8 @@
         integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
-    <script src="testdropdown.js"></script>
     <script>
+        const lengthMap = <%- JSON.stringify(lengthMap) %>;
         var weights = [<%= weight_mid %>];
         var weights_max = [<%= weight_max %>];
         var weights_min = [<%= weight_min %>];
@@ -421,14 +426,14 @@
         var robustness_ratios = [<%= robustness %>]
         const jsonData2D = <%- JSON.stringify(json2D) %>;
         const jsonData3D = <%- JSON.stringify(json3D) %>;
-        var missing_f1 = [<%= missing1 %>];
-        var missing_f2 = [<%= missing2 %>];
+        var missing_f = [<%= missing %>];
         var missing_y = [<%= missingy %>];
-        var clean_f1 = [<%= clean1 %>];
-        var clean_f2 = [<%= clean2 %>];
+        var clean_f = [<%= clean %>];
         var clean_y = [<%= cleany %>];
         var oneimputer = [<%= oneimp %>];
+        var missing_column = <%= missing_c %>;
     </script>
+    <script src="testdropdown.js"></script>
     <script src="drawgraph.js"></script>
     <script src="zonotope.js"></script>
     <script src="zonotope3d.js"></script>

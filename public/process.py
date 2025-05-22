@@ -7,6 +7,7 @@ import itertools
 import sys
 import json
 import re
+import sys
 
 import numpy as np
 import pandas as pd
@@ -41,11 +42,30 @@ class ForcePlus(LatexPrinter):
             else:
                 latex_terms.append(super()._print(term))
         return " ".join(latex_terms)
+
+import importlib.util
+import ginac_module
+
+class FileFormatError(Exception):
+    def __init__(self, f, *args):
+        super().__init__(args)
+        self.fname = f
+
+    def __str__(self):
+        return f'The file "{self.fname}" does not have a valid format! If the file is a training dataset, contact the administrator for assistance.'
     
-    # def _print_Mul(self, expr):
-    #     if expr.could_extract_minus_sign():
-    #         return f"(-{super()._print(-expr)})"
-    #     return super()._print_Mul(expr)
+symbol_id = -1
+
+def create_symbol(suffix=''):
+    global symbol_id
+    symbol_id += 1
+    name = f'e{symbol_id}_{suffix}' if suffix else f'e{symbol_id}'
+    return sympy.Symbol(name=name)
+
+def get_symbol_count(df):
+    global symbol_id
+    nan_count = np.isnan(df).sum()
+    symbol_id = nan_count - 1
 
 def add_red(match):
     return "\\textcolor{red}{" + match.group(0) + "}"
@@ -53,7 +73,7 @@ def add_red(match):
 def add_green(match):
     return "\\textcolor{green}{" + match.group(0) + "}"
 
-def round_coeff(expr, ndigits=4):
+def round_coeff(expr, ndigits=6):
     new_expr = 0
     
     for term in expr.as_ordered_terms():
@@ -66,7 +86,7 @@ def round_coeff(expr, ndigits=4):
 def simplify_expression(expr) -> str:
     data_count = 0
     nd_count = 0
-    print(expr, file=sys.stderr)
+    # print(expr, file=sys.stderr)
     expr = round_coeff(expr)
     print(expr, file=sys.stderr)
     symbols_list = list(expr.free_symbols)
@@ -96,11 +116,13 @@ def simplify_expression(expr) -> str:
 
         new_expr = sympy.Add(*simplified_list)
         new_latex = force_plus.doprint(new_expr)
+        print(new_latex, file=sys.stderr)
         latex_parts = new_latex.split('+')
         latex_parts.sort(key=lambda term: (0 if 'e_{0}' in term else 1 if 'e_{' + str(data_count - 1) in term else 2 if 'ep_{0}' in term else 3 if 'ep_{' + str(nd_count - 1) in term else 4))
 
         pattern_e = r"e_{\d+}"
         pattern_ep = r"ep_{\d+}"
+        print(latex_parts, file=sys.stderr)
         latex_parts = [re.sub(pattern_e, add_red, latex_parts[0]), re.sub(pattern_e, add_red, latex_parts[1]), re.sub(pattern_ep, add_green, latex_parts[2]), re.sub(pattern_ep, add_green, latex_parts[3]), latex_parts[4]]
 
         print(latex_parts, file=sys.stderr)
@@ -135,11 +157,22 @@ def get_expr_range_radius(expr):
 def get_expr_center(expr):
     return expr.subs(dict([(symb, 0) for symb in expr.free_symbols]))
 
+def sympy_to_ginac_format(expr):
+    """Convert SymPy expression to GiNaC-parseable string format."""
+    # Replace SymPy-specific functions with GiNaC equivalents
+    s = str(expr)
+    s = s.replace('**', '^')  # Exponentiation
+    s = s.replace('sin', 'GiNaC::sin')
+    s = s.replace('cos', 'GiNaC::cos')
+
+    return s
+
 def robustness_report(model, model_oi, X_test, ss):
-    # y_test_sp = sympy.Matrix(y_test.to_numpy().reshape(-1, 1))
     X_test_ss = np.append(np.ones((len(X_test), 1)), ss.transform(X_test), axis=1)
     X_test_sp = sympy.Matrix(X_test_ss)
-    test_preds = X_test_sp*model
+    X_test_list = list(np.array(X_test_sp, dtype=float))
+    X_test_list = [list(l) for l in X_test_list]
+    # test_preds = X_test_sp*model
     radius_base = 1000
     robustness_radius = [r * radius_base for r in [0.1, 0.2, 0.3, 0.5, 0.75, 1]]
     robustness_ratios = []
@@ -149,10 +182,14 @@ def robustness_report(model, model_oi, X_test, ss):
     pred_lb = []
     pred_oi = []
 
-    for pred_id in range(len(test_preds)):
-        pred = test_preds[pred_id]
-        pred_range_radius = get_expr_range_radius(pred)
-        pred_center = get_expr_center(pred)
+    ginac_param_list = [sympy_to_ginac_format(s) for s in model]
+
+    preds = ginac_module.pred_test(X_test_list, ginac_param_list)
+
+    for pred_id in range(len(X_test_list)):
+        # pred = test_preds[pred_id]
+        pred_range_radius = preds[pred_id][1]
+        pred_center = preds[pred_id][0]
         pred_centers.append(round(float(pred_center)))
         pred_ub.append(round(float(pred_center + pred_range_radius)))
         pred_lb.append(round(float(pred_center - pred_range_radius)))
@@ -167,7 +204,7 @@ def robustness_report(model, model_oi, X_test, ss):
 
     for radius in robustness_radius:
         robustness_ls = []
-        for pred_id in range(len(test_preds)):
+        for pred_id in range(len(X_test_list)):
             if pred_range_radiuses[pred_id] <= radius:
                 robustness_ls.append(1)
             else:
@@ -189,6 +226,14 @@ def getMissingDataIns(dirty_df, dirty_y):
             age.append(int(dirty_df.iloc[i]['age']))
             children.append(int(dirty_df.iloc[i]['children']))
             dirty_ys.append(round(float(dirty_y.iloc[i])))
+        elif pd.isna(dirty_df.iloc[i]['age']):
+            age.append(int(dirty_df.iloc[i]['bmi']))
+            children.append(int(dirty_df.iloc[i]['children']))
+            dirty_ys.append(round(float(dirty_y.iloc[i])))
+        elif pd.isna(dirty_df.iloc[i]['children']):
+            age.append(int(dirty_df.iloc[i]['bmi']))
+            children.append(int(dirty_df.iloc[i]['age']))
+            dirty_ys.append(round(float(dirty_y.iloc[i])))
         else:
             cage.append(int(dirty_df.iloc[i]['age']))
             cchildren.append(int(dirty_df.iloc[i]['children']))
@@ -196,24 +241,355 @@ def getMissingDataIns(dirty_df, dirty_y):
 
     return age, children, dirty_ys, cage, cchildren, cy
 
+def getMissingDataGeneral(dirty_df, dirty_y, uncertain_attr: int):
+    dirty_features = [[] for _ in range(dirty_df.shape[1])]
+    clean_features = [[] for _ in range(dirty_df.shape[1])]
+    dirty_ys = []
+    cy = []
+    
+    columns = dirty_df.columns.tolist()
+
+    for i in range(len(dirty_df)):
+        row = dirty_df.iloc[i]
+        label = round(float(dirty_y.iloc[i]))
+
+        if row.isna().any():
+            for j, col in enumerate(columns):
+                if pd.isna(row[col]):
+                    dirty_features[j].append(None)
+                else:
+                    dirty_features[j].append(float(row[col]))
+            
+            dirty_ys.append(round(float(label)))
+        
+        else:
+            for j, col in enumerate(columns):
+                clean_features[j].append(float(row[col]))
+                    
+            cy.append(round(float(label)))
+    
+    return dirty_features, clean_features, dirty_ys, cy
+
+def getFeaturesList(path_to_dataset):
+    try:
+        feature_df = pd.read_csv(path_to_dataset)
+    except:
+        try:
+            feature_df = pd.read_excel(path_to_dataset)
+        except:
+            f_name = path_to_dataset.split('/')[-1]
+            raise FileFormatError(f_name)
+        
+    return feature_df.columns.tolist()
+
+def compute_closed_form(X, y):
+    return np.matmul(np.linalg.inv(np.matmul(X.T, X)), np.matmul(X.T, y))
+
+def merge_small_components_pca(expr_ls, budget=10):
+    if not(isinstance(expr_ls, sympy.Expr)):
+        expr_ls = sympy.Matrix(expr_ls)
+    if expr_ls.free_symbols:
+        center = expr_ls.subs(dict([(symb, 0) for symb in expr_ls.free_symbols]))
+    else:
+        return expr_ls
+    monomials_dict = get_generators(expr_ls)
+    generators = np.array([monomials_dict[m] for m in monomials_dict])
+    if len(generators) <= budget:
+        return expr_ls
+    monomials = [m for m in monomials_dict]
+    pca = PCA(n_components=len(generators[0]))
+    pca.fit(np.concatenate([generators, -generators]))
+    transformed_generators = pca.transform(generators)
+    transformed_generator_norms = np.linalg.norm(transformed_generators, axis=1, ord=2)
+    # from largest to lowest norm
+    sorted_indices = transformed_generator_norms.argsort()[::-1].astype(int)
+    sorted_transformed_generators = transformed_generators[sorted_indices]
+    sorted_monomials = [monomials[idx] for idx in sorted_indices]
+    new_transformed_generators = np.concatenate([sorted_transformed_generators[:budget], 
+                                                 np.diag(np.sum(np.abs(sorted_transformed_generators[budget:]), 
+                                                                axis=0))])
+    new_generators = pca.inverse_transform(new_transformed_generators)
+    new_monomials = sorted_monomials[:budget] + [create_symbol() for _ in range(len(generators[0]))]
+    
+    processed_expr_ls = center
+    for monomial_id in range(len(new_monomials)):
+        processed_expr_ls += sympy.Matrix(new_generators[monomial_id])*new_monomials[monomial_id]
+    
+    return processed_expr_ls
+
+# take a list of expressions as input, output the list of monomials and generator vectors,
+def get_generators(expr_ls):
+    monomials = dict()
+    for expr_id, expr in enumerate(expr_ls):
+        if not(isinstance(expr, sympy.Expr)) or not(expr.free_symbols):
+            continue
+        expr = expr.expand()
+        p = sympy.Poly(expr)
+        monomials_in_expr = [sympy.prod(x**k for x, k in zip(p.gens, mon)) 
+                             for mon in p.monoms() if sum(mon) >= 1]
+        for monomial in monomials_in_expr:
+            coef = float(p.coeff_monomial(monomial))
+            if monomial in monomials:
+                if len(monomials[monomial]) < expr_id:
+                    monomials[monomial] = monomials[monomial] + [0 for _ in range(expr_id-len(monomials[monomial]))]
+                monomials[monomial].append(coef)
+            else:
+                monomials[monomial] = [0 for _ in range(expr_id)] + [coef]
+
+    for monomial in monomials:
+        if len(monomials[monomial]) < len(expr_ls):
+            monomials[monomial] = monomials[monomial] + [0 for _ in range(len(expr_ls)-len(monomials[monomial]))]
+    
+    return monomials
+
+def plot_conretiztion(affset, alpha = 0.5, color='red', budget=-1, 
+                      label='Ours', edgecolor=None, linewidth=1):
+    if budget > -1:
+        affset = merge_small_components_pca(affset, budget=budget)
+    pts = np.array(list(map(list, get_vertices(affset))))
+    hull = ConvexHull(pts)
+    print(pts[hull.vertices,0])
+    print(pts[hull.vertices,1])
+    plt.fill(pts[hull.vertices,0], pts[hull.vertices,1], color, alpha=alpha, 
+             label=label, edgecolor=edgecolor, linewidth=linewidth)
+
+def get_vertices(affset):
+    l = len(affset)
+    distinct_symbols = set()
+    for expr in affset:
+        if not(isinstance(expr, sympy.Expr)):
+            assert isinstance(expr, int) or isinstance(expr, float)
+        else:
+            if distinct_symbols:
+                distinct_symbols = distinct_symbols.union(expr.free_symbols)
+            else:
+                distinct_symbols = expr.free_symbols
+    distinct_symbols = list(distinct_symbols)
+    # print(distinct_symbols)
+    combs = [list(zip(distinct_symbols,list(l))) for l in list(itertools.product([-1, 1], repeat=len(distinct_symbols)))]
+    res = set()
+    for assignment in combs:
+        res.add(tuple([expr.subs(assignment) for expr in affset]))
+    return(res)
+
+def get_vertices_group(affset, alpha = 0.5, budget=-1):
+    if budget > -1:
+        affset = merge_small_components_pca(affset, budget=budget)
+    pts = np.array(list(map(list, get_vertices(affset))))
+    hull = ConvexHull(pts)
+    return pts[hull.vertices,0], pts[hull.vertices,1]
+
+def get_vertices_group_3(affset, alpha = 0.5, budget=-1):
+    if budget > -1:
+        affset = merge_small_components_pca(affset, budget=budget)
+    pts = np.array(list(map(list, get_vertices(affset))))
+    hull = ConvexHull(pts)
+    vertex_map = {old_index: new_index for new_index, old_index in enumerate(hull.vertices)}
+    simplified_simplices = np.array([
+        [vertex_map[idx] for idx in simplex]
+        for simplex in hull.simplices
+    ])
+
+    return pts[hull.vertices,0], pts[hull.vertices,1], pts[hull.vertices,2], simplified_simplices[:, 0], simplified_simplices[:, 1], simplified_simplices[:, 2]
+
     
 if __name__ == "__main__":
     dataset = sys.argv[1]
     test = sys.argv[2]
+    lr = float(sys.argv[3])
+    reg = float(sys.argv[4])
     features_list = []
 
-    if dataset == "i1":
+    with open('public/trained_model.json', 'r') as json_file:
+        json_str = json_file.read()
+        json_body = json.loads(json_str)
+
+    if dataset not in json_body.keys() or json_body[dataset][0] != lr or json_body[dataset][1] != reg:
+        # train new model
+        with open('public/custom.json', 'r') as train_json_file:
+            train_str = train_json_file.read()
+            train_json_body = json.loads(train_str)
+            if dataset not in train_json_body.keys():
+                raise FileFormatError('custom.json')
+        
+        feature_path = train_json_body[dataset][0]
+        feature_path = 'dataset/' + dataset + '/' + feature_path
+        label_path = train_json_body[dataset][1]
+        label_path = 'dataset/' + dataset + '/' + label_path
+        clean_path = train_json_body[dataset][2]
+        clean_path = 'dataset/' + dataset + '/' + clean_path
+
+        X_train = None
+        X_clean = None
+        y_train = None
+
+        try:
+            X_train = pd.read_csv(feature_path)
+        except:
+            try:
+                X_train = pd.read_excel(feature_path)
+            except:
+                f_name = feature_path.split('/')[-1]
+                raise FileFormatError(f_name)
+            
+        if X_train is None:
+            f_name = feature_path.split('/')[-1]
+            raise FileFormatError(f_name)
+        
+        try:
+            y_train = pd.read_csv(label_path)  
+        except:
+            try:
+                y_train = pd.read_excel(label_path)
+            except:
+                f_name = label_path.split('/')[-1]
+                raise FileFormatError(f_name)
+        
+        if y_train is None:
+            f_name = label_path.split('/')[-1]
+            raise FileFormatError(f_name)
+        
+        try:
+            X_clean = pd.read_csv(clean_path)
+        except:
+            try:
+                X_clean = pd.read_excel(clean_path)
+            except:
+                f_name = clean_path.split('/')[-1]
+                raise FileFormatError(f_name)
+            
+        if X_clean is None:
+            f_name = clean_path.split('/')[-1]
+            raise FileFormatError(f_name)
+
+        all_cols = X_train.columns.tolist()
+        all_cols_idx = [X_train.columns.to_list().index(c) for c in all_cols]
+        X_extended = np.append(np.ones((len(X_train), 1)), X_train.to_numpy().astype(float)[:, all_cols_idx], axis=1)
+        X_extended_clean = np.append(np.ones((len(X_clean), 1)), X_clean.to_numpy().astype(float)[:, all_cols_idx], axis=1)
+        ss = StandardScaler()
+        X_extended[:, 1:] = ss.fit_transform(X_extended[:, 1:])
+        X_extended_clean[:, 1:] = ss.transform(X_extended_clean[:, 1:])
+
+        uncertain_attr = 0
+        for i in range(X_extended.shape[1]):
+            if np.isnan(X_extended[:, i]).any():
+                uncertain_attr = i
+                break
+
+        imputers = [KNNImputer(n_neighbors=5), KNNImputer(n_neighbors=10), IterativeImputer(random_state=42)]
+        num_attrs = X_extended.shape[1]
+        X_nan = X_extended.copy()
+        imputed_cols = [X_extended_clean[:, uncertain_attr]]
+        imputed_datasets = [X_extended_clean]
+
+        for imp in imputers:
+            imputed_dataset = imp.fit_transform(X_nan)
+            imputed_datasets.append(imputed_dataset)
+            imputed_cols.append(imputed_dataset[:, uncertain_attr])
+
+        X_extended_max = X_extended.copy()
+        X_extended_max[:, uncertain_attr] = np.max(imputed_cols, axis=0)
+        X_extended_min = X_extended.copy()
+        X_extended_min[:, uncertain_attr] = np.min(imputed_cols, axis=0)
+
+        X_max_list = [list(l) for l in X_extended_max]
+        X_min_list = [list(l) for l in X_extended_min]
+        X_train_list = [list(l) for l in X_extended]
+        y_train_list = [float(l) for l in y_train.to_numpy()]
+
+        param_list = ginac_module.zorro(X_train_list, y_train_list, X_max_list, X_min_list, lr, reg)
+        param = sympy.Matrix([sympy.sympify(expr) for expr in param_list])
+
+        scaled_training = imputed_datasets[1]
+        one_imp_params = compute_closed_form(scaled_training, y_train)
+        one_imp_params = np.array(one_imp_params.values.flatten().tolist())
+        print("one_imp_params", one_imp_params, type(one_imp_params), file=sys.stderr)
+
+        get_symbol_count(X_extended)
+        param_clean = compute_closed_form(X_extended_clean, y_train)
+        param_clean = np.array(param_clean.values.flatten().tolist())
+        print("param_clean", param_clean, type(one_imp_params), file=sys.stderr)
+
+
+        json_2d = dict()
+        for i in range(X_extended.shape[1]):
+            for j in range(X_extended.shape[1]):
+                if i == j:
+                    continue
+                vert1, vert2 = get_vertices_group([param[i], param[j]], 0.5, budget=10)
+                vert1 = [float(l) for l in vert1]
+                vert2 = [float(l) for l in vert2]
+                vert1.append(vert1[0])
+                vert2.append(vert2[0])
+                json_2d['f' + str(i) + ',f' + str(j)] = [vert1, vert2]
+                
+        for a in range(X_extended.shape[1]):
+            json_2d[f'f{a}'] = float(param_clean[a])
+
+        os.makedirs(os.path.dirname('models/' + dataset + '/' + dataset + '_2d.json'), exist_ok=True)
+        with open('models/' + dataset + '/' + dataset + '_2d.json', 'w') as file:
+            json.dump(json_2d, file, indent=4)
+
+        # json_3d = dict()
+        # for i in range(X_extended.shape[1]):
+        #     for j in range(X_extended.shape[1]):
+        #         for k in range(X_extended.shape[1]):
+        #             if i == j or j == k or i == k:
+        #                 continue
+        #             vert1, vert2, vert3, triangle1, triangle2, triangle3 = get_vertices_group_3([param[i], param[j], param[k]], 0.5, budget=10)
+        #             vert1 = [float(l) for l in vert1]
+        #             vert2 = [float(l) for l in vert2]
+        #             vert3 = [float(l) for l in vert3]
+        #             triangle1 = [int(l) for l in triangle1]
+        #             triangle2 = [int(l) for l in triangle2]
+        #             triangle3 = [int(l) for l in triangle3]
+        #             json_3d['f' + str(i) + ',f' + str(j) + ',f' + str(k)] = [vert1, vert2, vert3, triangle1, triangle2, triangle3]
+
+        # for a in range(X_extended.shape[1]):
+        #     json_3d[f'f{a}'] = float(param_clean[a])
+
+        # os.makedirs(os.path.dirname('models/' + dataset + '/' + dataset + '_3d.json'), exist_ok=True)
+        # with open('models/' + dataset + '/' + dataset + '_3d.json', 'w') as file:
+        #     json.dump(json_3d, file, indent=4)
+
+        with open('models/' + dataset + '/' + dataset + '_model.pkl', 'wb') as file:
+            pickle.dump(param, file)
+
+        with open('models/' + dataset + '/' + dataset + '_model_1imp.pkl', 'wb') as file:
+            pickle.dump(one_imp_params, file)
+
+        with open('models/' + dataset + '/' + dataset + '_ss.pkl', 'wb') as file:
+            pickle.dump(ss, file)
+
+        with open('models/' + dataset + '/' + dataset + '_X_train_dirty.pkl', 'wb') as file:
+            pickle.dump(X_train, file)
+
+        with open('models/' + dataset + '/' + dataset + '_y_train_dirty.pkl', 'wb') as file:
+            pickle.dump(y_train, file)
+
+        json_body[dataset] = [lr, reg]
+        with open('public/trained_model.json', 'w') as json_file:
+            json_file.write(json.dumps(json_body))
+
+    # choose dataset
+    if dataset == "Insurance" and lr == 0.01 and reg == 0:
         with open('models/ins/ins_30_model.pkl', 'rb') as file:
             model = pickle.load(file)
         features_list = ["age", "bmi", "children"]
+
+        # load model with only one imputer
         with open('models/ins/ins_30_model_1imp.pkl', 'rb') as file:
             model_one = pickle.load(file)
+
+        # load test data
         if test == "t1":
             with open('models/ins/ins_30_X_test_s1.pkl', 'rb') as file:
                 X_test = pickle.load(file)
         if test == "t2":
             with open('models/ins/ins_30_X_test_s2.pkl', 'rb') as file:
                 X_test = pickle.load(file)
+
+        # load standardscaler and dirty train data
         with open('models/ins/ins_30_ss.pkl', 'rb') as file:
             ss = pickle.load(file)
         with open('models/ins/ins_30_X_train_dirty.pkl', 'rb') as file:
@@ -226,6 +602,76 @@ if __name__ == "__main__":
             X_test_lists.append([float(j) for j in X_test.values[i].flatten().tolist()])
 
         dage, dchildren, dy, age, children, cy = getMissingDataIns(X_train_dirty, y_train_dirty)
+        missing = [dage, dchildren]
+        clean_data = [age, children]
+        missing_feature = 'bmi'
+        missing_column = 1
+
+    else:
+        with open('models/' + dataset + '/' + dataset + '_model.pkl', 'rb') as file:
+            model = pickle.load(file)
+
+        with open('public/custom.json', 'r') as feature_json:
+            feature_json_str = feature_json.read()
+            feature_json_body = json.loads(feature_json_str)
+            # print(feature_json_body)
+            if dataset not in feature_json_body.keys():
+                raise FileFormatError('custom.json')
+            
+            feature_set = feature_json_body[dataset][0]
+
+        features_list = getFeaturesList('dataset/' + dataset + '/' + feature_set)
+
+        with open('models/' + dataset + '/' + dataset + '_model_1imp.pkl', 'rb') as file:
+            model_one = pickle.load(file)
+
+        with open('public/custom_test.json', 'r') as test_json:
+            test_json_str = test_json.read()
+            test_json_body = json.loads(test_json_str)
+            # print(feature_json_body)
+            if dataset not in test_json_body.keys():
+                raise FileFormatError('custom_test.json')
+            
+            test_set = test_json_body[dataset]
+
+        for i in range(len(test_set)):
+            if test == "t" + str(i + 1):
+                X_test = None
+                try:
+                    X_test = pd.read_csv('dataset/' + dataset + '/' + test_set[i][0])
+                except:
+                    try:
+                        X_test = pd.read_excel('dataset/' + dataset + '/' + test_set[i][0])
+                    except:
+                        f_name = test_set[i]
+                        raise FileFormatError(f_name)
+                if X_test is None:
+                    f_name = test_set[i]
+                    raise FileFormatError(f_name)
+                
+                break
+
+        with open('models/' + dataset + '/' + dataset + '_ss.pkl', 'rb') as file:
+            ss = pickle.load(file)
+        with open('models/' + dataset + '/' + dataset + '_X_train_dirty.pkl', 'rb') as file:
+            X_train_dirty = pickle.load(file)
+        with open('models/' + dataset + '/' + dataset + '_y_train_dirty.pkl', 'rb') as file:
+            y_train_dirty = pickle.load(file)
+
+        X_test_lists = []
+        for i in range(len(X_test)):
+            X_test_lists.append([float(j) for j in X_test.values[i].flatten().tolist()])
+
+        dirty_df = X_train_dirty.to_numpy().astype(float)
+        uncertain_attr = 0
+        for i in range(dirty_df.shape[1]):
+            if np.isnan(dirty_df[:, i]).any():
+                uncertain_attr = i
+                break
+
+        missing, clean_data, dy, cy = getMissingDataGeneral(X_train_dirty, y_train_dirty, uncertain_attr)
+        missing_feature = str(X_train_dirty.columns[uncertain_attr])
+        missing_column = uncertain_attr
 
     latex_str = "\left[\\begin{matrix}"
     weight_max = []
@@ -260,14 +706,13 @@ if __name__ == "__main__":
         "ub": ub,
         "lb": lb,
         "X_test": X_test_lists,
-        "missing1": dage,
-        "missing2": dchildren,
         "missingy": dy,
-        "clean1": age,
-        "clean2": children,
         "cleany": cy,
-        "oneimp": oip
+        "oneimp": oip,
+        "missing": missing,
+        "clean": clean_data,
+        "missing_feature": missing_feature,
+        "missing_column": missing_column
     }
 
     print(json.dumps(output))
-    

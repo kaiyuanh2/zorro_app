@@ -64,6 +64,14 @@ body {
     display: none;
 }
 
+#learningRate {
+    display: none;
+}
+
+#regularization {
+    display: none;
+}
+
 .thick-border {
     border-left: 3px solid black !important;
 }
