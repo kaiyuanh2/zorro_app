@@ -27,6 +27,7 @@ from sympy import Symbol as sb
 from sympy import lambdify
 from IPython.display import display,clear_output
 from random import choice
+from multiprocessing import Pool
 
 from sympy.printing.latex import LatexPrinter
 class ForcePlus(LatexPrinter):
@@ -242,8 +243,8 @@ def getMissingDataIns(dirty_df, dirty_y):
     return age, children, dirty_ys, cage, cchildren, cy
 
 def getMissingDataGeneral(dirty_df, dirty_y, uncertain_attr: int):
-    dirty_features = [[] for _ in range(dirty_df.shape[1])]
-    clean_features = [[] for _ in range(dirty_df.shape[1])]
+    dirty_features = [[] for _ in range(dirty_df.shape[1] - 1)]
+    clean_features = [[] for _ in range(dirty_df.shape[1] - 1)]
     dirty_ys = []
     cy = []
     
@@ -254,17 +255,29 @@ def getMissingDataGeneral(dirty_df, dirty_y, uncertain_attr: int):
         label = round(float(dirty_y.iloc[i]))
 
         if row.isna().any():
+            flag = True
             for j, col in enumerate(columns):
-                if pd.isna(row[col]):
-                    dirty_features[j].append(None)
-                else:
+                if j == uncertain_attr:
+                    flag = False
+                    continue
+
+                if flag:
                     dirty_features[j].append(float(row[col]))
+                else:
+                    dirty_features[j-1].append(float(row[col]))
             
             dirty_ys.append(round(float(label)))
         
         else:
+            flag = True
             for j, col in enumerate(columns):
-                clean_features[j].append(float(row[col]))
+                if j == uncertain_attr:
+                    flag = False
+                    continue
+                if flag:
+                    clean_features[j].append(float(row[col]))
+                else:
+                    clean_features[j-1].append(float(row[col]))
                     
             cy.append(round(float(label)))
     
@@ -316,6 +329,103 @@ def merge_small_components_pca(expr_ls, budget=10):
         processed_expr_ls += sympy.Matrix(new_generators[monomial_id])*new_monomials[monomial_id]
     
     return processed_expr_ls
+
+def merge_small_components_pca_optimized(expr_ls, budget=10):
+    # Convert to sympy.Matrix only if needed
+    if not isinstance(expr_ls, sympy.Expr):
+        expr_ls = sympy.Matrix(expr_ls)
+    
+    # Early exit if no free symbols
+    free_symbols = expr_ls.free_symbols
+    if not free_symbols:
+        return expr_ls
+    
+    # Compute center more efficiently
+    center = expr_ls.subs([(symb, 0) for symb in free_symbols])
+    
+    # Get generators
+    monomials_dict = get_generators(expr_ls)
+    if len(monomials_dict) <= budget:
+        return expr_ls
+    
+    # Convert to numpy arrays once
+    monomials = list(monomials_dict.keys())
+    generators = np.array([monomials_dict[m] for m in monomials])
+    
+    # Optimize PCA fitting
+    # Instead of concatenating [generators, -generators], we can use the fact that
+    # PCA on X and PCA on [X, -X] give the same principal components
+    pca = PCA(n_components=generators.shape[1])
+    pca.fit(generators)  # Just fit on generators, not doubled
+    
+    # Transform and compute norms in one operation
+    transformed_generators = pca.transform(generators)
+    transformed_generator_norms = np.linalg.norm(transformed_generators, axis=1, ord=2)
+    
+    # Use argpartition instead of full sort (faster for large arrays)
+    if len(generators) > budget * 2:
+        # We only need the top 'budget' elements
+        top_budget_indices = np.argpartition(transformed_generator_norms, -budget)[-budget:]
+        sorted_indices = top_budget_indices[np.argsort(transformed_generator_norms[top_budget_indices])[::-1]]
+    else:
+        sorted_indices = transformed_generator_norms.argsort()[::-1]
+    
+    # Select top generators
+    sorted_transformed_generators = transformed_generators[sorted_indices]
+    sorted_monomials = [monomials[idx] for idx in sorted_indices]
+    
+    # Optimize the diagonal computation
+    remaining_transformed = sorted_transformed_generators[budget:]
+    if remaining_transformed.size > 0:
+        diagonal_values = np.sum(np.abs(remaining_transformed), axis=0)
+        new_transformed_generators = np.vstack([
+            sorted_transformed_generators[:budget],
+            np.diag(diagonal_values)
+        ])
+    else:
+        new_transformed_generators = sorted_transformed_generators[:budget]
+    
+    # Inverse transform
+    new_generators = pca.inverse_transform(new_transformed_generators)
+    
+    # Pre-create all symbols at once (if create_symbol is expensive)
+    num_new_symbols = new_generators.shape[0] - budget
+    new_symbols = [create_symbol() for _ in range(num_new_symbols)]
+    new_monomials = sorted_monomials[:budget] + new_symbols
+    
+    # Optimize final expression construction
+    # Instead of adding in a loop, construct all at once
+    monomial_matrix = sympy.zeros(len(new_generators[0]), 1)
+    for monomial_id, (generator, monomial) in enumerate(zip(new_generators, new_monomials)):
+        monomial_matrix += sympy.Matrix(generator) * monomial
+    
+    processed_expr_ls = center + monomial_matrix
+    
+    return processed_expr_ls
+
+def process_2d_pair(ij, param):
+    i, j = ij
+    if i == j:
+        return None
+    vert1, vert2 = get_vertices_group([param[i], param[j]], 0.5, budget=10)
+    vert1 = [float(l) for l in vert1]
+    vert2 = [float(l) for l in vert2]
+    vert1.append(vert1[0])
+    vert2.append(vert2[0])
+    return f'f{i},f{j}', [vert1, vert2]
+
+def process_3d_triplet(ijk, param):
+    i, j, k = ijk
+    if i == j or j == k or i == k:
+        return None
+    vert1, vert2, vert3, triangle1, triangle2, triangle3 = get_vertices_group_3([param[i], param[j], param[k]], 0.5, budget=10)
+    vert1 = [float(l) for l in vert1]
+    vert2 = [float(l) for l in vert2]
+    vert3 = [float(l) for l in vert3]
+    triangle1 = [int(l) for l in triangle1]
+    triangle2 = [int(l) for l in triangle2]
+    triangle3 = [int(l) for l in triangle3]
+    return f'f{i},f{j},f{k}', [vert1, vert2, vert3, triangle1, triangle2, triangle3]
 
 # take a list of expressions as input, output the list of monomials and generator vectors,
 def get_generators(expr_ls):
@@ -374,14 +484,14 @@ def get_vertices(affset):
 
 def get_vertices_group(affset, alpha = 0.5, budget=-1):
     if budget > -1:
-        affset = merge_small_components_pca(affset, budget=budget)
+        affset = merge_small_components_pca_optimized(affset, budget=budget)
     pts = np.array(list(map(list, get_vertices(affset))))
     hull = ConvexHull(pts)
     return pts[hull.vertices,0], pts[hull.vertices,1]
 
 def get_vertices_group_3(affset, alpha = 0.5, budget=-1):
     if budget > -1:
-        affset = merge_small_components_pca(affset, budget=budget)
+        affset = merge_small_components_pca_optimized(affset, budget=budget)
     pts = np.array(list(map(list, get_vertices(affset))))
     hull = ConvexHull(pts)
     vertex_map = {old_index: new_index for new_index, old_index in enumerate(hull.vertices)}
@@ -510,25 +620,53 @@ if __name__ == "__main__":
         param_clean = np.array(param_clean.values.flatten().tolist())
         print("param_clean", param_clean, type(one_imp_params), file=sys.stderr)
 
+        # 2D zonotope processing
+        n = X_extended.shape[1]
+        pairs = [(i, j) for i in range(n) for j in range(n)]
 
-        json_2d = dict()
-        for i in range(X_extended.shape[1]):
-            for j in range(X_extended.shape[1]):
-                if i == j:
-                    continue
-                vert1, vert2 = get_vertices_group([param[i], param[j]], 0.5, budget=10)
-                vert1 = [float(l) for l in vert1]
-                vert2 = [float(l) for l in vert2]
-                vert1.append(vert1[0])
-                vert2.append(vert2[0])
-                json_2d['f' + str(i) + ',f' + str(j)] = [vert1, vert2]
-                
-        for a in range(X_extended.shape[1]):
+        with Pool() as pool:
+            results_2d = pool.map(functools.partial(process_2d_pair, param=param), pairs)
+
+        json_2d = {k: v for k, v in results_2d if k is not None}
+        for a in range(n):
             json_2d[f'f{a}'] = float(param_clean[a])
 
         os.makedirs(os.path.dirname('models/' + dataset + '/' + dataset + '_2d.json'), exist_ok=True)
         with open('models/' + dataset + '/' + dataset + '_2d.json', 'w') as file:
             json.dump(json_2d, file, indent=4)
+
+        # 3D zonotope processing
+        triplets = [(i, j, k) for i in range(n) for j in range(n) for k in range(n)]
+
+        with Pool() as pool:
+            results_3d = pool.map(functools.partial(process_3d_triplet, param=param), triplets)
+
+        json_3d = {k: v for k, v in results_3d if k is not None}
+        for a in range(n):
+            json_3d[f'f{a}'] = float(param_clean[a])
+
+        os.makedirs(os.path.dirname('models/' + dataset + '/' + dataset + '_3d.json'), exist_ok=True)
+        with open('models/' + dataset + '/' + dataset + '_3d.json', 'w') as file:
+            json.dump(json_3d, file, indent=4)
+
+        # json_2d = dict()
+        # for i in range(X_extended.shape[1]):
+        #     for j in range(X_extended.shape[1]):
+        #         if i == j:
+        #             continue
+        #         vert1, vert2 = get_vertices_group([param[i], param[j]], 0.5, budget=10)
+        #         vert1 = [float(l) for l in vert1]
+        #         vert2 = [float(l) for l in vert2]
+        #         vert1.append(vert1[0])
+        #         vert2.append(vert2[0])
+        #         json_2d['f' + str(i) + ',f' + str(j)] = [vert1, vert2]
+                
+        # for a in range(X_extended.shape[1]):
+        #     json_2d[f'f{a}'] = float(param_clean[a])
+
+        # os.makedirs(os.path.dirname('models/' + dataset + '/' + dataset + '_2d.json'), exist_ok=True)
+        # with open('models/' + dataset + '/' + dataset + '_2d.json', 'w') as file:
+        #     json.dump(json_2d, file, indent=4)
 
         # json_3d = dict()
         # for i in range(X_extended.shape[1]):

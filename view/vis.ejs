@@ -46,15 +46,12 @@
                                                 <% } %>
                                             </select>
                                         </div>
-                                        <!-- Initially hidden elements -->
+
                                         <div class="col-md-3" id="testSelect">
                                             <select class="form-select" name="test" id="test">
                                                 <option value="" selected>--Test Set--</option>
                                                 <% if (item) { %>
-                                                    <% const count = lengthMap[item] || 0; %>
-                                                    <% for (let i=1; i<=count; i++) { %>
-                                                        <option value="t<%= i %>" <%=test==="t"+i ? 'selected' : '' %>>Test Set <%= i %></option>
-                                                    <% } %>
+                                                    <%- testOptionsHtml %>
                                                 <% } %>
                                             </select>
                                         </div>
@@ -426,9 +423,9 @@
         var robustness_ratios = [<%= robustness %>]
         const jsonData2D = <%- JSON.stringify(json2D) %>;
         const jsonData3D = <%- JSON.stringify(json3D) %>;
-        var missing_f = [<%= missing %>];
+        var missing_f = <%- JSON.stringify(missing) %>;
         var missing_y = [<%= missingy %>];
-        var clean_f = [<%= clean %>];
+        var clean_f = <%- JSON.stringify(clean) %>;
         var clean_y = [<%= cleany %>];
         var oneimputer = [<%= oneimp %>];
         var missing_column = <%= missing_c %>;

@@ -21,7 +21,7 @@ function drawZonotope() {
         // console.log(key2D1);
         // console.log(key2D2);
         if (keys2D.includes(key2D1)) {
-            // console.log(jsonData2D[key2D1][0]);
+            console.log(key2D1);
             var trace1 = { x: jsonData2D[key2D1][0],
                 y: jsonData2D[key2D1][1],
                 name: 'Zonotope', fill: 'toself', type: 'scatter' };
@@ -36,9 +36,32 @@ function drawZonotope() {
             var zdata = [trace1, trace2];
             var zlayout = {
                 title: '<b>2D Zonotope</b>',
-                xaxis: { title: "Feature 1", tickformat: '.0f' }, yaxis: { title: "Feature 2", tickformat: '.0f' }
+                xaxis: { title: "Feature 1", tickformat: '.2f' }, yaxis: { title: "Feature 2", tickformat: '.2f' }
             };
             Plotly.newPlot('zonotopeGraph', zdata, zlayout);
+        }
+        else {
+            const key2D2 = f2Dropdown.value + "," + f1Dropdown.value;
+            if (keys2D.includes(key2D2)) {
+                console.log(key2D2);
+                var trace1 = { x: jsonData2D[key2D2][1],
+                    y: jsonData2D[key2D2][0],
+                    name: 'Zonotope', fill: 'toself', type: 'scatter' };
+                
+                var trace2 = {
+                        x: [jsonData2D[f1Dropdown.value]],
+                        y: [jsonData2D[f2Dropdown.value]],
+                        name: 'Ground Truth',
+                        mode: 'markers',
+                        type: 'scatter'
+                };
+                var zdata = [trace1, trace2];
+                var zlayout = {
+                    title: '<b>2D Zonotope</b>',
+                    xaxis: { title: "Feature 1", tickformat: '.2f' }, yaxis: { title: "Feature 2", tickformat: '.2f' }
+                };
+                Plotly.newPlot('zonotopeGraph', zdata, zlayout);
+            }
         }
     }
 }

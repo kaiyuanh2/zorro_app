@@ -63,6 +63,8 @@ function drawMissing() {
                 new_index = new_index + 1;
             }
             var xlabel = x_labels[new_index];
+            console.log("missing_x: ", missing_x);
+            console.log("missing_y: ", missing_y);
         }
 
         // if (fmDropdown.value == 'f1') {
@@ -96,7 +98,7 @@ function drawMissing() {
         var data_missing = [trace_clean, trace_missing];
         var layout_missing = {
             title: '<b>Distribution of Missing Data Points</b>',
-            xaxis: { title: xlabel }, yaxis: { title: 'charges', tickformat: '.0f' }, // height: 350
+            xaxis: { title: xlabel }, yaxis: { title: 'label', tickformat: '.0f' }, // height: 350
          };
         Plotly.newPlot('missingGraph', data_missing, layout_missing);
     }

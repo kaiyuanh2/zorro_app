@@ -103,7 +103,16 @@ app.get('/visualizations', (req, res) => {
     }
     console.log(lengthMap);
 
-    res.render('vis', {lengthMap, keys, item, test, expression, weight_max, weight_min, weight_mid, features, robustness, ub, lb, x_test, json2D, json3D, missing, missingy, clean, cleany, oneimp, missing_f, missing_c, messages: req.flash('error')});
+    var testOptionsHtml = '';
+    if (item) {
+        const count = lengthMap[item] || 0;
+        for (let i = 1; i <= count; i++) {
+            const selected = test === `t${i}` ? ' selected' : '';
+            testOptionsHtml += `<option value="t${i}"${selected}>Test Set ${i}</option>`;
+        }
+    }
+
+    res.render('vis', {lengthMap, keys, item, test, expression, weight_max, weight_min, weight_mid, features, robustness, ub, lb, x_test, json2D, json3D, missing, missingy, clean, cleany, oneimp, missing_f, missing_c, testOptionsHtml, messages: req.flash('error')});
 })
 
 app.post('/visualizations', validateParametersPost, (req, res) => {
@@ -141,6 +150,15 @@ app.post('/visualizations', validateParametersPost, (req, res) => {
       if (Array.isArray(test_js[key])) {
         lengthMap[key] = test_js[key].length;
       }
+    }
+
+    var testOptionsHtml = '';
+    if (item) {
+        const count = lengthMap[item] || 0;
+        for (let i = 1; i <= count; i++) {
+            const selected = test === `t${i}` ? ' selected' : '';
+            testOptionsHtml += `<option value="t${i}"${selected}>Test Set ${i}</option>`;
+        }
     }
 
     // modify between python and python3 according to your system
@@ -184,7 +202,8 @@ app.post('/visualizations', validateParametersPost, (req, res) => {
             var json2D = JSON.parse(fs.readFileSync('./models/' + item + '/' + item + '_2d.json', 'utf-8'));
             var json3D = ["a"];
         }
-        res.render('vis', {lengthMap, item, test, expression, weight_max, weight_min, weight_mid, features, robustness, ub, lb, x_test, json2D, json3D, missing, missingy, clean, cleany, oneimp, missing_f, missing_c, messages: req.flash('error')});
+
+        res.render('vis', {lengthMap, item, test, expression, weight_max, weight_min, weight_mid, features, robustness, ub, lb, x_test, json2D, json3D, missing, missingy, clean, cleany, oneimp, missing_f, missing_c, testOptionsHtml, messages: req.flash('error')});
     });
 
 })
@@ -208,6 +227,11 @@ app.post('/test-dataset', uploadTest, uploadProcessTest, (req, res) => {
     const page_name = 'test-dataset';
     res.render('dataset_test', {page_name, success: req.flash('success'), error: req.flash('error')});
 })
+
+app.get('/test-select', (req, res) => {
+    const simpleHtml = '<option value="t1" selected>Test 1</option><option value="t2">Test 2</option>';
+    res.render('test-select', { simpleHtml });
+});
 
 app.all('*', (req, res, next) => {
     next(new ExpressError('Page Not Found', 404))
