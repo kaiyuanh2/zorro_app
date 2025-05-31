@@ -168,13 +168,15 @@ def sympy_to_ginac_format(expr):
 
     return s
 
-def robustness_report(model, model_oi, X_test, ss):
+def robustness_report(model, model_oi, X_test, ss, y_train):
     X_test_ss = np.append(np.ones((len(X_test), 1)), ss.transform(X_test), axis=1)
     X_test_sp = sympy.Matrix(X_test_ss)
     X_test_list = list(np.array(X_test_sp, dtype=float))
     X_test_list = [list(l) for l in X_test_list]
     # test_preds = X_test_sp*model
-    radius_base = 1000
+    y_train_list = [float(l) for l in y_train.to_numpy()]
+    radius_base = 10 ** int(np.log10(np.median(y_train_list)))
+    print("radius_base", radius_base, file=sys.stderr)
     robustness_radius = [r * radius_base for r in [0.1, 0.2, 0.3, 0.5, 0.75, 1]]
     robustness_ratios = []
     pred_range_radiuses = []
@@ -191,9 +193,9 @@ def robustness_report(model, model_oi, X_test, ss):
         # pred = test_preds[pred_id]
         pred_range_radius = preds[pred_id][1]
         pred_center = preds[pred_id][0]
-        pred_centers.append(round(float(pred_center)))
-        pred_ub.append(round(float(pred_center + pred_range_radius)))
-        pred_lb.append(round(float(pred_center - pred_range_radius)))
+        pred_centers.append(round(float(pred_center), 2))
+        pred_ub.append(round(float(pred_center + pred_range_radius), 2))
+        pred_lb.append(round(float(pred_center - pred_range_radius), 2))
         pred_range_radiuses.append(pred_range_radius)
         oi_pred = 0
         for j in range(len(model_oi)):
@@ -213,7 +215,7 @@ def robustness_report(model, model_oi, X_test, ss):
 
         robustness_ratios.append(float(np.mean(robustness_ls)))
 
-    return robustness_ratios, pred_centers, pred_ub, pred_lb, pred_oi
+    return robustness_ratios, pred_centers, pred_ub, pred_lb, pred_oi, robustness_radius
 
 def getMissingDataIns(dirty_df, dirty_y):
     age = []
@@ -407,7 +409,7 @@ def process_2d_pair(ij, param):
     i, j = ij
     if i == j:
         return None
-    vert1, vert2 = get_vertices_group([param[i], param[j]], 0.5, budget=10)
+    vert1, vert2 = get_vertices_group([param[i], param[j]], 0.5, budget=5)
     vert1 = [float(l) for l in vert1]
     vert2 = [float(l) for l in vert2]
     vert1.append(vert1[0])
@@ -416,15 +418,13 @@ def process_2d_pair(ij, param):
 
 def process_3d_triplet(ijk, param):
     i, j, k = ijk
-    if i == j or j == k or i == k:
-        return None
-    vert1, vert2, vert3, triangle1, triangle2, triangle3 = get_vertices_group_3([param[i], param[j], param[k]], 0.5, budget=10)
+    vert1, vert2, vert3, triangle1, triangle2, triangle3 = get_vertices_group_3([param[i], param[j], param[k]], 0.5, budget=5)
     vert1 = [float(l) for l in vert1]
     vert2 = [float(l) for l in vert2]
     vert3 = [float(l) for l in vert3]
-    triangle1 = [int(l) for l in triangle1]
-    triangle2 = [int(l) for l in triangle2]
-    triangle3 = [int(l) for l in triangle3]
+    triangle1 = [float(l) for l in triangle1]
+    triangle2 = [float(l) for l in triangle2]
+    triangle3 = [float(l) for l in triangle3]
     return f'f{i},f{j},f{k}', [vert1, vert2, vert3, triangle1, triangle2, triangle3]
 
 # take a list of expressions as input, output the list of monomials and generator vectors,
@@ -622,12 +622,12 @@ if __name__ == "__main__":
 
         # 2D zonotope processing
         n = X_extended.shape[1]
-        pairs = [(i, j) for i in range(n) for j in range(n)]
+        pairs = list(itertools.combinations(range(n), 2))  # Only unique combinations for faster processing
 
         with Pool() as pool:
             results_2d = pool.map(functools.partial(process_2d_pair, param=param), pairs)
 
-        json_2d = {k: v for k, v in results_2d if k is not None}
+        json_2d = dict(filter(None, results_2d))
         for a in range(n):
             json_2d[f'f{a}'] = float(param_clean[a])
 
@@ -636,59 +636,19 @@ if __name__ == "__main__":
             json.dump(json_2d, file, indent=4)
 
         # 3D zonotope processing
-        triplets = [(i, j, k) for i in range(n) for j in range(n) for k in range(n)]
+        triplets = list(itertools.combinations(range(n), 3))  # Only unique combinations for faster processing
 
         with Pool() as pool:
             results_3d = pool.map(functools.partial(process_3d_triplet, param=param), triplets)
 
-        json_3d = {k: v for k, v in results_3d if k is not None}
+        json_3d = dict(filter(None, results_3d))
+
         for a in range(n):
             json_3d[f'f{a}'] = float(param_clean[a])
 
         os.makedirs(os.path.dirname('models/' + dataset + '/' + dataset + '_3d.json'), exist_ok=True)
         with open('models/' + dataset + '/' + dataset + '_3d.json', 'w') as file:
             json.dump(json_3d, file, indent=4)
-
-        # json_2d = dict()
-        # for i in range(X_extended.shape[1]):
-        #     for j in range(X_extended.shape[1]):
-        #         if i == j:
-        #             continue
-        #         vert1, vert2 = get_vertices_group([param[i], param[j]], 0.5, budget=10)
-        #         vert1 = [float(l) for l in vert1]
-        #         vert2 = [float(l) for l in vert2]
-        #         vert1.append(vert1[0])
-        #         vert2.append(vert2[0])
-        #         json_2d['f' + str(i) + ',f' + str(j)] = [vert1, vert2]
-                
-        # for a in range(X_extended.shape[1]):
-        #     json_2d[f'f{a}'] = float(param_clean[a])
-
-        # os.makedirs(os.path.dirname('models/' + dataset + '/' + dataset + '_2d.json'), exist_ok=True)
-        # with open('models/' + dataset + '/' + dataset + '_2d.json', 'w') as file:
-        #     json.dump(json_2d, file, indent=4)
-
-        # json_3d = dict()
-        # for i in range(X_extended.shape[1]):
-        #     for j in range(X_extended.shape[1]):
-        #         for k in range(X_extended.shape[1]):
-        #             if i == j or j == k or i == k:
-        #                 continue
-        #             vert1, vert2, vert3, triangle1, triangle2, triangle3 = get_vertices_group_3([param[i], param[j], param[k]], 0.5, budget=10)
-        #             vert1 = [float(l) for l in vert1]
-        #             vert2 = [float(l) for l in vert2]
-        #             vert3 = [float(l) for l in vert3]
-        #             triangle1 = [int(l) for l in triangle1]
-        #             triangle2 = [int(l) for l in triangle2]
-        #             triangle3 = [int(l) for l in triangle3]
-        #             json_3d['f' + str(i) + ',f' + str(j) + ',f' + str(k)] = [vert1, vert2, vert3, triangle1, triangle2, triangle3]
-
-        # for a in range(X_extended.shape[1]):
-        #     json_3d[f'f{a}'] = float(param_clean[a])
-
-        # os.makedirs(os.path.dirname('models/' + dataset + '/' + dataset + '_3d.json'), exist_ok=True)
-        # with open('models/' + dataset + '/' + dataset + '_3d.json', 'w') as file:
-        #     json.dump(json_3d, file, indent=4)
 
         with open('models/' + dataset + '/' + dataset + '_model.pkl', 'wb') as file:
             pickle.dump(param, file)
@@ -829,7 +789,7 @@ if __name__ == "__main__":
 
     latex_str += "\end{matrix}\\right]"
 
-    robustness, pred_c, ub, lb, oip = robustness_report(model, model_one, X_test, ss)
+    robustness, pred_c, ub, lb, oip, rb_radius = robustness_report(model, model_one, X_test, ss, y_train_dirty)
 
     # print(weight_max, file=sys.stderr)
 
@@ -850,7 +810,8 @@ if __name__ == "__main__":
         "missing": missing,
         "clean": clean_data,
         "missing_feature": missing_feature,
-        "missing_column": missing_column
+        "missing_column": missing_column,
+        "robustness_radius": rb_radius
     }
 
     print(json.dumps(output))

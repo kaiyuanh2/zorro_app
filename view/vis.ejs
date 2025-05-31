@@ -51,7 +51,10 @@
                                             <select class="form-select" name="test" id="test">
                                                 <option value="" selected>--Test Set--</option>
                                                 <% if (item) { %>
-                                                    <%- testOptionsHtml %>
+                                                    <% const count = lengthMap[item] || 0 %>
+                                                    <% for (let i=1; i<=count+1; i++) { %>
+                                                        <option value="<%= 't' + i %>" <%=test==='t'+i ? 'selected' : '' %>><%= 'Test Set ' + i %></option>
+                                                    <% } %>
                                                 <% } %>
                                             </select>
                                         </div>
@@ -81,12 +84,13 @@
                                                 </div>
                                                 <div class="modal-body">
                                                     <div class="form-group row mt-2 align-items-center">
-                                                        <p><label><b>--Dataset--</b> Choose an uploaded dataset to run ZORRO predictions on it, if you do not see the dataset you are looking for, please upload using the button below.</label></p>
+                                                        <p><label><b>--Dataset--</b> Choose an uploaded dataset to run ZORRO training and predictions on it, if you do not see the dataset you are looking for, please upload using the button below.</label></p>
                                                         <p>After selecting a training and testing dataset, input desired learning rate and regularization values, click "Confirm" to show corresponding visualizations.</p>
+                                                        <p>The most recent model trained on each training set will be cached. If learning rate and regularization are not modified, it will retrieve cached models directly, which means loading time will be much faster.</p>
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-success"
-                                                        onclick="window.location.href='/dataset'"><strong>+</strong> Upload a Training Dataset</button>
+                                                        onclick="window.location.href='/dataset'"><strong>+</strong> Upload New Train Set</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -275,9 +279,6 @@
                                     <% if (expression=='' ) { %>
                                             <div><p class="card-text">Nothing is selected.</p></div>
                                         <% } else { %>
-                                            <% if (item != "Insurance") { %>
-                                                <div><p class="card-text">Sorry, 3D zonotope visualization is not available for this dataset.</p></div>
-                                            <% } else { %>
                                             <div id="zonotopeForm3D">
                                                 <form id="zonotopeForm3D" action="" method="">
                                                     <div class="form-group row mt-2 align-items-center">
@@ -313,7 +314,6 @@
                                                 </form>
                                             </div>
                                             <div class="mt-2" id="zonotopeG3D"></div>
-                                        <% } %>
                                     <% } %>
                                 </div>
                             </div>
@@ -378,13 +378,14 @@
                                                             </tr>
                                                         </thead>
                                                         <tbody>
+                                                            <% const robust_r = rb_radius[1] || 200; %>
                                                             <% for (var i=0; i<x_test.length; i++) { %>
                                                                 <tr>
                                                                     <th scope="row"><%= i+1 %></th>
                                                                     <% for (var j in x_test[i]) { %>
                                                                         <td><%= x_test[i][j] %></td>
                                                                     <% } %>
-                                                                    <% if ((ub[i] - lb[i]) / 2 < 200) { %>
+                                                                    <% if ((ub[i] - lb[i]) / 2 < robust_r) { %>
                                                                         <td class="thick-border td-highlight">[<%= lb[i] %>, <%= ub[i] %>]</td>
                                                                         <% rb_count += 1; %>
                                                                     <% } else { %>
@@ -396,7 +397,7 @@
                                                         </tbody>
                                                     </table>
                                                 </div>
-                                                <p>Robustness radius threshold: 200 (Robust predictions are highlighted in blue)</p>
+                                                <p>Robustness radius threshold: <%= robust_r %> (Robust predictions are highlighted in blue)</p>
                                                 <p>Robustness ratio under this threshold: <%= rb_count / x_test.length * 100 %>%</p>
                                             </div>
                                         <% } %>
@@ -429,6 +430,7 @@
         var clean_y = [<%= cleany %>];
         var oneimputer = [<%= oneimp %>];
         var missing_column = <%= missing_c %>;
+        var robustness_radius = [<%= rb_radius %>]
     </script>
     <script src="testdropdown.js"></script>
     <script src="drawgraph.js"></script>

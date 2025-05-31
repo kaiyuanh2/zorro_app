@@ -86,6 +86,7 @@ app.get('/visualizations', (req, res) => {
     var json3D = ["a"];
     var missing_f = '';
     var missing_c = 0;
+    var rb_radius = [0];
 
     datasetJSString = fs.readFileSync("./public/custom.json").toString();
     dataset_map = new Map(Object.entries(JSON.parse(datasetJSString)));
@@ -112,7 +113,7 @@ app.get('/visualizations', (req, res) => {
         }
     }
 
-    res.render('vis', {lengthMap, keys, item, test, expression, weight_max, weight_min, weight_mid, features, robustness, ub, lb, x_test, json2D, json3D, missing, missingy, clean, cleany, oneimp, missing_f, missing_c, testOptionsHtml, messages: req.flash('error')});
+    res.render('vis', {lengthMap, keys, item, test, expression, weight_max, weight_min, weight_mid, features, robustness, ub, lb, x_test, json2D, json3D, missing, missingy, clean, cleany, oneimp, missing_f, missing_c, rb_radius, messages: req.flash('error')});
 })
 
 app.post('/visualizations', validateParametersPost, (req, res) => {
@@ -137,6 +138,7 @@ app.post('/visualizations', validateParametersPost, (req, res) => {
     var oneimp = [0];
     var missing_f = '';
     var missing_c = 0;
+    var rb_radius = [0];
 
     datasetJSString = fs.readFileSync("./public/custom.json").toString();
     dataset_map = new Map(Object.entries(JSON.parse(datasetJSString)));
@@ -150,15 +152,6 @@ app.post('/visualizations', validateParametersPost, (req, res) => {
       if (Array.isArray(test_js[key])) {
         lengthMap[key] = test_js[key].length;
       }
-    }
-
-    var testOptionsHtml = '';
-    if (item) {
-        const count = lengthMap[item] || 0;
-        for (let i = 1; i <= count; i++) {
-            const selected = test === `t${i}` ? ' selected' : '';
-            testOptionsHtml += `<option value="t${i}"${selected}>Test Set ${i}</option>`;
-        }
     }
 
     // modify between python and python3 according to your system
@@ -190,6 +183,7 @@ app.post('/visualizations', validateParametersPost, (req, res) => {
             oneimp = output.oneimp;
             missing_f = output.missing_feature;
             missing_c = output.missing_column;
+            rb_radius = output.robustness_radius;
         }
         
         console.log(features);
@@ -200,10 +194,10 @@ app.post('/visualizations', validateParametersPost, (req, res) => {
         }
         else {
             var json2D = JSON.parse(fs.readFileSync('./models/' + item + '/' + item + '_2d.json', 'utf-8'));
-            var json3D = ["a"];
+            var json3D = JSON.parse(fs.readFileSync('./models/' + item + '/' + item + '_3d.json', 'utf-8'));
         }
 
-        res.render('vis', {lengthMap, item, test, expression, weight_max, weight_min, weight_mid, features, robustness, ub, lb, x_test, json2D, json3D, missing, missingy, clean, cleany, oneimp, missing_f, missing_c, testOptionsHtml, messages: req.flash('error')});
+        res.render('vis', {lengthMap, item, test, expression, weight_max, weight_min, weight_mid, features, robustness, ub, lb, x_test, json2D, json3D, missing, missingy, clean, cleany, oneimp, missing_f, missing_c, rb_radius, messages: req.flash('error')});
     });
 
 })

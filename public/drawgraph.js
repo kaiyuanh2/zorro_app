@@ -40,7 +40,7 @@ var trace_robust = {
 var data_robust = [trace_robust];
 var layout_robust = {
     title: '<b>Robustness Ratio Under Different Robustness Radius</b>',
-    xaxis: { title: 'Robustness Radius', tickvals: [1, 2, 3, 4, 5, 6], ticktext: ["100", "200", "300", "500", "750", "1000"] },
+    xaxis: { title: 'Robustness Radius', tickvals: [1, 2, 3, 4, 5, 6], ticktext: robustness_radius },
     yaxis: { title: 'Robustness Ratio', tickformat: ',.0%' }, // height: 350
 };
 Plotly.newPlot('robustnessGraph', data_robust, layout_robust);
