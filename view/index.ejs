@@ -1,14 +1,31 @@
 <% layout('layouts/boilerplate') %>
 
 <div class="content">
-	<div id="headingGroup">
-		<h1>Zorro Demo</h1>
+
+    <div id="headingGroup">
+		<h1>Instructions</h1>
+	</div>
+
+	<div id="aboutText">
+        <ol>
+            <li>To start the application please select <b>Use Zorro</b> from the navigation bar (top right)</li>
+            <li><b>Loading Training and Test datasets.</b>Then select a training dataset from the dropdown or upload a new training dataset with quality issues. Once the dataset is loaded you can select what test dataset to use and then set the learning rate and regular coefficient. Once you press confirm, Zorro will ingest the datasets and create abstract versions based on the specificed data quality issues and train an abstract model over-approximating all possible models and compute prediction intervals for each test data point.</li>
+            <li><b>Exploring Model Parameters.</b> You can then explore the parameters of the abstract model. Zorro encodes such a model as a zonotope, a convex polytope that encloses all possible models. You can inspect the symbolic representation of the zonotope where the model parameter for each dimension of the model is a linear combination of variables called error terms or explore a 2D or 3D projection of the model zonotope on 2 or 3 features.</li>
+            <li><b>Exploring Predictions.</b> On the right-hand side you can explore the predictions for the test dataset. Zorro computes a viable prediction interval for each test data point. All possible predictions based on models trained over all possible clean versions of the data set are contained in the prediction intervals computed by Zorro. Furthermore, you can investigate the robustness of the model. Zorro plots the fraction of test data points whose prediction is robust based on a user-provided error bound. The prediction for a data point is considered robust if the its prediction interval is smaller than the error bound.</li>
+        </ol>
+	</div>
+
+	<br />
+
+
+    <div id="headingGroup">
+		<h1>Zorro Background</h1>
 	</div>
 
 	<br />
 
 	<div id="aboutText">
-		<p>Zorro is a system for machine learning linear models over training and test data that is suffers from a variety of data quality issues. Given a training dataset with quality issues, e.g., missing values or outliers, Zorro treats the set of possible clean versions of the dataset as the possible worlds of an incomplete database and then trains all possible models and determines predication intervals for each test data points with respect to all possible models. As this is computationally infeasible, we instead use abstract interpretation to compactly over-approximate the space of possible training datasets, models, and inference results. Zorro utilizes Zonotopes, a type of convex polytope, to compactly represent these dataset variations, enabling the symbolic execution of gradient descent on all possible worlds simultaneously.</p>
+		<p>Zorro is a system for machine learning on training and test data that is suffers from a variety of data quality issues. Given a training dataset with quality issues, e.g., missing values or outliers, Zorro treats the set of possible clean versions of the dataset as the possible worlds of an incomplete database and then trains all possible optimal linear models and determines predication intervals for each test data points with respect to all possible models. As this is computationally infeasible, we instead use abstract interpretation to compactly over-approximate the space of possible training datasets, models, and inference results. Zorro utilizes Zonotopes, a type of convex polytope, to compactly represent these dataset variations, enabling the symbolic execution of gradient descent on all possible worlds simultaneously.</p>
 
 		<p>Users interact with the system as follows:</p>
 
@@ -24,20 +41,6 @@
 
 	<br />
 
-	<div id="headingGroup">
-		<h2>Help</h2>
-	</div>
-
-	<div id="aboutText">
-        <ol>
-            <li>To start the application select <i>Visualizations</i> from the menu bar (top right)</li>
-            <li><b>Loading Training and Test datasets.</b>Then select a training dataset from the dropdown or upload a new training dataset with quality issues. Once the dataset is loaded you can select what test dataset to use and then set the learning rate and regular coefficient. Once you press confirm, Zorro will ingest the datasets and create abstract versions based on the specificed data quality issues and train an abstract model over-approximating all possible models and compute prediction intervals for each test data point.</li>
-            <li><b>Exploring Model Parameters.</b> You can then explore the parameters of the abstract model. Zorro encodes such a model as a zonotope, a convex polytope that encloses all possible models. You can inspect the symbolic representation of the zonotope where the model parameter for each dimension of the model is a linear combination of variables called error terms or explore a 2D or 3D projection of the model zonotope on 2 or 3 features.</li>
-            <li><b>Exploring Predictions.</b> On the right-hand side you can explore the predictions for the test dataset. Zorro computes a viable prediction interval for each test data point. All possible predictions based on models trained over all possible clean versions of the data set are contained in the prediction intervals computed by Zorro. Furthermore, you can investigate the robustness of the model. Zorro plots the fraction of test data points whose prediction is robust based on a user-provided error bound. The prediction for a data point is considered robust if the its prediction interval is smaller than the error bound.</li>
-        </ol>
-	</div>
-
-	<br />
 
 	<div id="headingGroup">
 		<h3>References:</h3>
