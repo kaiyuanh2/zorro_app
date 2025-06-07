@@ -4,9 +4,9 @@ Zorro is a system for machine learning linear models over training and test data
 
 Users interact with the system as follows:
 
-1. The user uploads a training and test dataset and informs the system about the data quality issues in the dataset. For example, feature `age` has missing values. Zorro then bounds the possible clean versions of the dataset automatically using zonotopes.
-2. Zorro then computes an abstract model where the model weights are zonotopes, guaranteeing that the optimal model for each possible training dataset are encompassed by the abstract model. In the Zorro's UI, the user can visually explore this abstract model, e.g., to investigate the range of possible weights for a feature through 2D and 3D projections of the zonotope polytopes or by directly inspecting the symbolic expressions of the abstract model.
-3. Zorro then computes all possible predictions based on the possible models and shows them as predication intervals for each test data point. The system guarantees that for each test data point all possible outcomes are included in the predication intervals. The user can browse through the test prediction or analyze the robustness ratio of the model (given a user-specified tolerance on the width of prediction intervals, which fraction of test datapoints receive a robust prediction).
+1. **Uploading training and test data**: the user uploads a training and test dataset and informs the system about the data quality issues in the dataset. For example, feature `age` has missing values. Zorro then bounds the possible clean versions of the dataset automatically using zonotopes.
+2. **Model training and exploration**: Zorro then computes an abstract model where the model weights are zonotopes, guaranteeing that the optimal model for each possible training dataset are encompassed by the abstract model. In the Zorro's UI, the user can visually explore this abstract model, e.g., to investigate the range of possible weights for a feature through 2D and 3D projections of the zonotope polytopes or by directly inspecting the symbolic expressions of the abstract model.
+3. **Inference and robustness evaluation**: Zorro then computes all possible predictions based on the possible models and shows them as predication intervals for each test data point. The system guarantees that for each test data point all possible outcomes are included in the predication intervals. The user can browse through the test prediction or analyze the robustness ratio of the model (given a user-specified tolerance on the width of prediction intervals, which fraction of test datapoints receive a robust prediction).
 
 Zorro is the first system the empowers users to evaluate the robustness of their models when training data (and potentially also test data) is subject to data quality issues. That is, how robust is the model over all possible repairs of a training / test dataset.
 
@@ -58,3 +58,9 @@ zorro.sh
 ```
 
 Then open `127.0.0.1:3000` in your browser.
+
+# References
+
+- [Learning from Uncertain Data: From Possible Worlds to Possible Models. Jiongli Zhu, Su Feng, Boris Glavic and Babak Salimi. NeurIPS 2024.](http://www.cs.uic.edu/%7ebglavic/dbgroup/assets/pdfpubls/ZF24.pdf)
+- [Zorro: Quantifying Uncertainty in Models & Predictions Arising from Dirty Data.
+Kaiyuan Hu, Jiongli Zhu, Boris Glavic and Babak Salimi. SIGMOD 2025 demo](http://www.cs.uic.edu/%7ebglavic/dbgroup/assets/pdfpubls/HZ25.pdf)
