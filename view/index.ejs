@@ -1,35 +1,54 @@
 <% layout('layouts/boilerplate') %>
 
-    <div class="content">
-        <div id="headingGroup">
-            <h1>ZORRO DEMO</h1>
-        </div>
+<div class="content">
+	<div id="headingGroup">
+		<h1>Zorro Demo</h1>
+	</div>
 
-        <br>
+	<br />
 
-        <div id="aboutText">
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Eveniet provident at aliquam exercitationem facilis, placeat, harum sunt minima, quo dicta doloremque nisi. Incidunt distinctio quibusdam, aspernatur quasi beatae vero quae!</p>
-        </div>
+	<div id="aboutText">
+		<p>Zorro is a system for machine learning linear models over training and test data that is suffers from a variety of data quality issues. Given a training dataset with quality issues, e.g., missing values or outliers, Zorro treats the set of possible clean versions of the dataset as the possible worlds of an incomplete database and then trains all possible models and determines predication intervals for each test data points with respect to all possible models. As this is computationally infeasible, we instead use abstract interpretation to compactly over-approximate the space of possible training datasets, models, and inference results. Zorro utilizes Zonotopes, a type of convex polytope, to compactly represent these dataset variations, enabling the symbolic execution of gradient descent on all possible worlds simultaneously.</p>
 
-        <br>
+		<p>Users interact with the system as follows:</p>
 
-        <div id="headingGroup">
-            <h2>Introduction</h2>
-        </div>
+		<ol>
+			<li><strong>Uploading training and test data</strong>: the user uploads a training and test dataset and informs the system about the data quality issues in the dataset. For example, feature <code>age</code> has missing values. Zorro then bounds the possible clean versions of the dataset automatically using zonotopes.</li>
+			<li><strong>Model training and exploration</strong>: Zorro then computes an abstract model where the model weights are zonotopes, guaranteeing that the optimal model for each possible training dataset are encompassed by the abstract model. In the Zorro UI, the user can visually explore this abstract model, e.g., to investigate the range of possible weights for a feature through 2D and 3D projections of the zonotope polytopes or by directly inspecting the symbolic expressions of the abstract model.</li>
+			<li><strong>Inference and robustness evaluation</strong>: Zorro then computes all possible predictions based on the possible models and shows them as predication intervals for each test data point. The system guarantees that for each test data point all possible outcomes are included in the predication intervals. The user can browse through the test prediction or analyze the robustness ratio of the model (given a user-specified tolerance on the width of prediction intervals, which fraction of test datapoints receive a robust prediction).</li>
+		</ol>
 
-        <div id="aboutText">
-            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eius, neque ipsum placeat dolorum error quam, non deserunt amet esse aperiam cupiditate fugiat ducimus nesciunt quo quis omnis labore aut laborum.</p>
-        </div>
+		<p>Zorro is the first system the empowers users to evaluate the robustness of their models when training data (and potentially also test data) is subject to data quality issues. That is, how robust is the model over all possible repairs of a training / test dataset.</p>
 
-        <br>
+	</div>
 
-        <div id="headingGroup">
-            <h3>References:</h3>
-        </div>
+	<br />
 
-        <div id="referenceText">
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nisi, ipsam, omnis debitis blanditiis harum minima ea, expedita dignissimos aperiam sunt quae fugiat quis vel maiores quisquam maxime? Molestiae, laboriosam aspernatur?
-            </p>
-        </div>
-        
-    </div>
+	<div id="headingGroup">
+		<h2>Help</h2>
+	</div>
+
+	<div id="aboutText">
+        <ol>
+            <li>To start the application select <i>Visualizations</i> from the menu bar (top right)</li>
+            <li><b>Loading Training and Test datasets.</b>Then select a training dataset from the dropdown or upload a new training dataset with quality issues. Once the dataset is loaded you can select what test dataset to use and then set the learning rate and regular coefficient. Once you press confirm, Zorro will ingest the datasets and create abstract versions based on the specificed data quality issues and train an abstract model over-approximating all possible models and compute prediction intervals for each test data point.</li>
+            <li><b>Exploring Model Parameters.</b> You can then explore the parameters of the abstract model. Zorro encodes such a model as a zonotope, a convex polytope that encloses all possible models. You can inspect the symbolic representation of the zonotope where the model parameter for each dimension of the model is a linear combination of variables called error terms or explore a 2D or 3D projection of the model zonotope on 2 or 3 features.</li>
+            <li><b>Exploring Predictions.</b> On the right-hand side you can explore the predictions for the test dataset. Zorro computes a viable prediction interval for each test data point. All possible predictions based on models trained over all possible clean versions of the data set are contained in the prediction intervals computed by Zorro. Furthermore, you can investigate the robustness of the model. Zorro plots the fraction of test data points whose prediction is robust based on a user-provided error bound. The prediction for a data point is considered robust if the its prediction interval is smaller than the error bound.</li>
+        </ol>
+	</div>
+
+	<br />
+
+	<div id="headingGroup">
+		<h3>References:</h3>
+	</div>
+
+	<div id="referenceText">
+		<ul>
+			<li><a href="http://www.cs.uic.edu/%7ebglavic/dbgroup/assets/pdfpubls/ZF24.pdf">Learning from Uncertain Data: From Possible Worlds to Possible Models. Jiongli Zhu, Su Feng, Boris Glavic and Babak Salimi. NeurIPS 2024.</a></li>
+			<li><a href="http://www.cs.uic.edu/%7ebglavic/dbgroup/assets/pdfpubls/HZ25.pdf">Zorro: Quantifying Uncertainty in Models &amp; Predictions Arising from Dirty Data.
+				Kaiyuan Hu, Jiongli Zhu, Boris Glavic and Babak Salimi. SIGMOD 2025 demo</a></li>
+		</ul>
+	</div>
+
+</div>
