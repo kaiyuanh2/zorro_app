@@ -9,7 +9,7 @@
     "leaflet-geoserver-request": "^1.2.2",
     "method-override": "^3.0.0",
     "multer": "^2.0.1",
-    "nodemon": "^3.1.9",
+    "nodemon": "^3.1.10",
     "nodeplotlib": "^0.7.7",
     "python-shell": "^5.0.0",
     "sanitize-html": "^2.10.0"

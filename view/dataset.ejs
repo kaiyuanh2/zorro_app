@@ -48,6 +48,16 @@
 
                         <div class="row align-items-center mt-3">
                             <div class="col-10">
+                                <label for="dataDesc" class="form-label">Description of Dataset (optional):</label>
+                                <textarea rows="4" maxlength="300" style="resize: none;" id="dataDesc" name="dataDesc" class="form-control"></textarea>
+                            </div>
+                            <div class="col-2 d-flex justify-content-center align-items-center" id="descCounter">
+                                0/200 characters
+                            </div>
+                        </div>
+
+                        <div class="row align-items-center mt-3">
+                            <div class="col-10">
                                 <label for="dataName" class="form-label">Name of Dataset (required):</label>
                                 <input type="text" id="dataName" name="dataName" class="form-control" required>
                             </div>
@@ -103,3 +113,5 @@
         </div>
         
     </div>
+
+    <script src="textcounter.js"></script>

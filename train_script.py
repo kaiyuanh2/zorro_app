@@ -94,3 +94,7 @@ if __name__ == '__main__':
 
     with open('./public/custom.json', 'w') as json_file:
         json_file.write(new_json)
+
+    desc_filename = "./dataset/" + line[3] + "/" + line[3] + "_description.txt"
+    with open(desc_filename, "w") as desc_file:
+        desc_file.write(line[4])

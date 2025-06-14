@@ -46,7 +46,7 @@ app.engine('ejs', ejsMate)
 
 app.use(express.static(path.join(__dirname, 'public')))
 const sessionConfig = {
-    name: 'mapsession',
+    name: 'zorroappsession',
     secret: 'thisisasecret',
     resave: false,
     saveUninitialized: true,
@@ -58,6 +58,18 @@ const sessionConfig = {
 };
 app.use(session(sessionConfig));
 app.use(flash());
+
+function linkify(text) {
+    const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.+[a-zA-Z]{2,}[^\s]*)/g;
+
+    return text.replace(urlRegex, (url) => {
+    let href = url;
+    if (!url.startsWith('http')) {
+        href = 'http://' + url;
+    }
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+    });
+}
 
 app.get('/', (req, res) => {
     res.render('index')
@@ -87,6 +99,7 @@ app.get('/visualizations', (req, res) => {
     var missing_f = '';
     var missing_c = 0;
     var rb_radius = [0];
+    var descContent = '';
 
     datasetJSString = fs.readFileSync("./public/custom.json").toString();
     dataset_map = new Map(Object.entries(JSON.parse(datasetJSString)));
@@ -97,23 +110,20 @@ app.get('/visualizations', (req, res) => {
     test_js = JSON.parse(testJSString);
 
     var lengthMap = {};
+    var testMap = {};
     for (const key in test_js) {
       if (Array.isArray(test_js[key])) {
         lengthMap[key] = test_js[key].length;
+        testMap[key] = [];
+        for (let i = 0; i < test_js[key].length; i++) {
+            testMap[key].push(test_js[key][i][2]);
+        }
       }
     }
     console.log(lengthMap);
 
-    var testOptionsHtml = '';
-    if (item) {
-        const count = lengthMap[item] || 0;
-        for (let i = 1; i <= count; i++) {
-            const selected = test === `t${i}` ? ' selected' : '';
-            testOptionsHtml += `<option value="t${i}"${selected}>Test Set ${i}</option>`;
-        }
-    }
-
-    res.render('vis', {lengthMap, keys, item, test, expression, weight_max, weight_min, weight_mid, features, robustness, ub, lb, x_test, json2D, json3D, missing, missingy, clean, cleany, oneimp, missing_f, missing_c, rb_radius, messages: req.flash('error')});
+    res.render('vis', {lengthMap, keys, item, test, expression, weight_max, weight_min, weight_mid, features, robustness, ub, lb, x_test, json2D, json3D, missing, missingy,
+        clean, cleany, oneimp, missing_f, missing_c, rb_radius, descContent, testMap, messages: req.flash('error'), linkify: linkify});
 })
 
 app.post('/visualizations', validateParametersPost, (req, res) => {
@@ -148,9 +158,14 @@ app.post('/visualizations', validateParametersPost, (req, res) => {
     test_js = JSON.parse(testJSString);
 
     var lengthMap = {};
+    var testMap = {};
     for (const key in test_js) {
       if (Array.isArray(test_js[key])) {
         lengthMap[key] = test_js[key].length;
+        testMap[key] = [];
+        for (let i = 0; i < test_js[key].length; i++) {
+            testMap[key].push(test_js[key][i][2]);
+        }
       }
     }
 
@@ -197,7 +212,10 @@ app.post('/visualizations', validateParametersPost, (req, res) => {
             var json3D = JSON.parse(fs.readFileSync('./models/' + item + '/' + item + '_3d.json', 'utf-8'));
         }
 
-        res.render('vis', {lengthMap, item, test, expression, weight_max, weight_min, weight_mid, features, robustness, ub, lb, x_test, json2D, json3D, missing, missingy, clean, cleany, oneimp, missing_f, missing_c, rb_radius, messages: req.flash('error')});
+        var descContent = fs.readFileSync('./dataset/' + item + '/' + item + '_description.txt', 'utf-8');
+
+        res.render('vis', {lengthMap, item, test, expression, weight_max, weight_min, weight_mid, features, robustness, ub, lb, x_test, json2D, json3D, missing, missingy,
+            clean, cleany, oneimp, missing_f, missing_c, rb_radius, descContent, testMap, messages: req.flash('error'), linkify: linkify});
     });
 
 })

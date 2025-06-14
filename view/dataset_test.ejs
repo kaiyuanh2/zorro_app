@@ -40,8 +40,15 @@
 
                         <div class="row align-items-center mt-3">
                             <div class="col-10">
-                                <label for="testSetName" class="form-label">Name of Dataset (required, please strictly match training set name):</label>
+                                <label for="testSetName" class="form-label">Name of Training Dataset (required, please strictly match):</label>
                                 <input type="text" id="testSetName" name="testSetName" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="row align-items-center mt-3">
+                            <div class="col-10">
+                                <label for="testSetNameSelf" class="form-label">Name of Testing Dataset (required, an informative name is recommended):</label>
+                                <input type="text" id="testSetNameSelf" name="testSetNameSelf" class="form-control" required>
                             </div>
                             <div class="col-2 d-flex justify-content-center align-items-center">
                                 <button type="submit" class="btn btn-primary btn-lg"><strong>+</strong> Upload</button>

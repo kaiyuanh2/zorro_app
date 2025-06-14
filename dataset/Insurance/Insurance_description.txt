@@ -1,0 +1,1 @@
+A dataset of healthcare insurance charges on insured person regarding age, BMI, and (number of) children (non-numerical features are removed in this version for convenience). Link: https://www.kaggle.com/datasets/arunjangir245/healthcare-insurance-expenses

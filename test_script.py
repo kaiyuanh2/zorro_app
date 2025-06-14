@@ -115,9 +115,9 @@ if __name__ == '__main__':
         json_body = json.loads(json_str)
         # print(json_body)
         if line[2] not in json_body.keys():
-            json_body[line[2]] = [[line[0].split('/')[-1], line[1].split('/')[-1]]]
+            json_body[line[2]] = [[line[0].split('/')[-1], line[1].split('/')[-1], line[3]]]
         else:
-            json_body[line[2]].append([line[0].split('/')[-1], line[1].split('/')[-1]])
+            json_body[line[2]].append([line[0].split('/')[-1], line[1].split('/')[-1], line[3]])
 
     with open('./public/custom_test.json', 'w') as json_file:
         json_file.write(json.dumps(json_body))

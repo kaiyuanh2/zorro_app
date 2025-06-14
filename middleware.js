@@ -32,6 +32,7 @@ function createNewTrain(req, res) {
         py.send(req.files.dataLabel[0].path);
         py.send(req.files.dataClean[0].path);
         py.send(req.body.dataName);
+        py.send(req.body.dataDesc);
 
         // Switch comment here to change the dev mode of Python script
         // py.send('dev');
@@ -63,6 +64,7 @@ function createNewTest(req, res) {
         py.send(req.files.dataSetTest[0].path);
         py.send(req.files.dataLabelTest[0].path);
         py.send(req.body.testSetName);
+        py.send(req.body.testSetNameSelf);
 
         // Switch comment here to change the dev mode of Python script
         // py.send('dev');

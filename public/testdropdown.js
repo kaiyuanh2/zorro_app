@@ -34,7 +34,7 @@ function updateTestOptions() {
         for (let i = 1; i <= count; i++) {
             const option = document.createElement('option');
             option.value = 't' + i;
-            option.text = 'Test Set ' + i;
+            option.text = testMap[selectedItem][i - 1] || 'Test Set ' + i;
             testSelect.add(option);
         }
     }
