@@ -31,7 +31,7 @@
                 <div class="col-md-12 mx-auto">
                     <div class="card w-100 h-100">
                         <div class="card-header">
-                            <div class="row mt-1 mb-1 p-1"><h4><b>Select Datasets</b></h4></div>
+                            <div class="row mt-1 mb-1 p-1"><h4><b>Select Dataset</b></h4></div>
                         </div>
                             <div class="card-block p-2">
                                 <form id="display_options" action="/visualizations" method="POST">
@@ -378,7 +378,11 @@
                                                                 <tr>
                                                                     <th scope="row"><%= i+1 %></th>
                                                                     <% for (var j in x_test[i]) { %>
-                                                                        <td><%= x_test[i][j] %></td>
+                                                                        <% if (j == missing_c) { %>
+                                                                            <td class="mf-highlight"><%= x_test[i][j] %></td>
+                                                                        <% } else { %>
+                                                                            <td><%= x_test[i][j] %></td>
+                                                                        <% } %>
                                                                     <% } %>
                                                                     <% if ((ub[i] - lb[i]) / 2 < robust_r) { %>
                                                                         <td class="thick-border td-highlight">[<%= lb[i] %>, <%= ub[i] %>]</td>
@@ -392,6 +396,7 @@
                                                         </tbody>
                                                     </table>
                                                 </div>
+                                                <p>Test set: <%= testMap[item][parseInt(test.substring(1)) - 1] %>. Column of feature having data quality issues is highlighted in orange.</p>
                                                 <p>Robustness radius threshold: <%= robust_r %> (Robust predictions are highlighted in blue)</p>
                                                 <p>Robustness ratio under this threshold: <%= rb_count / x_test.length * 100 %>%</p>
                                             </div>
