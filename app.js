@@ -240,11 +240,6 @@ app.post('/test-dataset', uploadTest, uploadProcessTest, (req, res) => {
     res.render('dataset_test', {page_name, success: req.flash('success'), error: req.flash('error')});
 })
 
-app.get('/test-select', (req, res) => {
-    const simpleHtml = '<option value="t1" selected>Test 1</option><option value="t2">Test 2</option>';
-    res.render('test-select', { simpleHtml });
-});
-
 app.all('*', (req, res, next) => {
     next(new ExpressError('Page Not Found', 404))
 })
